@@ -25,6 +25,8 @@ return "No scritps" unless $cpath;
 my ($epath) = grep { -f "$_/my_print_defaults"; } "$::bindir/extra", $::path_client_bindir;
 return "No my_print_defaults" unless $epath;
 
+my ($bpath) = grep { -f "$_/mariabackup"; } "$::bindir/extra/mariabackup", $::path_client_bindir;
+
 push @::global_suppressions,
   (
      qr(WSREP: wsrep_sst_receive_address is set to '127.0.0.1),
@@ -81,11 +83,16 @@ push @::global_suppressions,
 $ENV{PATH}="$epath:$ENV{PATH}";
 $ENV{PATH}="$spath:$ENV{PATH}" unless $epath eq $spath;
 $ENV{PATH}="$cpath:$ENV{PATH}" unless $cpath eq $spath;
+$ENV{PATH}="$bpath:$ENV{PATH}" unless $bpath eq $spath;
 
 sub skip_combinations {
   my %skip = ();
   $skip{'include/have_xtrabackup.inc'} = 'Need innobackupex'
              unless `which innobackupex 2>/dev/null`;
+  $skip{'include/have_mariabackup.inc'} = 'Need mariabackup'
+             unless `which mariabackup 2>/dev/null`;
+  $skip{'include/have_mariabackup.inc'} = 'Need ss'
+             unless `which ss 2>/dev/null`;
   %skip;
 }
 
