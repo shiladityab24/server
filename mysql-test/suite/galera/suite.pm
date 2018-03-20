@@ -82,5 +82,11 @@ $ENV{PATH}="$epath:$ENV{PATH}";
 $ENV{PATH}="$spath:$ENV{PATH}" unless $epath eq $spath;
 $ENV{PATH}="$cpath:$ENV{PATH}" unless $cpath eq $spath;
 
-bless { };
+sub skip_combinations {
+  my %skip = ();
+  $skip{'include/have_xtrabackup.inc'} = 'Need innobackupex'
+             unless `which innobackupex 2>/dev/null`;
+  %skip;
+}
 
+bless { };
