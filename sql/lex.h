@@ -66,6 +66,11 @@ static SYMBOL symbols[] = {
   { "ALTER",		SYM(ALTER)},
   { "ALWAYS",           SYM(ALWAYS_SYM)},
   { "ANALYZE",		SYM(ANALYZE_SYM)},
+  { "SAMPLING", SYM(SAMPLING)}, // 
+  { "PERCENT", SYM(PERCENT)}, // 
+  { "LASTS", SYM(LASTS)}, // 
+  { "SECONDS", SYM(SECONDS)}, //
+  { "INTERVALS", SYM(INTERVALS)}, //
   { "AND",		SYM(AND_SYM)},
   { "ANY",              SYM(ANY_SYM)},
   { "AS",		SYM(AS)},

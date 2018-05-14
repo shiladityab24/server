@@ -1,0 +1,32 @@
+#
+# Test for ANALYZE FAST ... PERSISTENT FOR COLUMNS (...) 
+#
+DROP TABLE IF EXISTS Table1;
+Warnings:
+Note	1051	Unknown table 'test.Table1'
+CREATE TABLE Table1 (
+PetName varchar(20),
+LastName varchar(20),
+FirstName varchar(20)
+);
+INSERT INTO Table1 VALUES ("Flufy", "Yates", "Maria");
+INSERT INTO Table1 VALUES ("Buttons", "David", "Jones");
+INSERT INTO Table1 VALUES ("Paws", "Johanson", "Samuel");
+SELECT * FROM Table1;
+PetName	LastName	FirstName
+Flufy	Yates	Maria
+Buttons	David	Jones
+Paws	Johanson	Samuel
+ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (PetName);
+Table	Op	Msg_type	Msg_text
+test.Table1	analyze	status	Engine-independent statistics collected
+test.Table1	analyze	status	OK
+ANALYZE FAST TABLE Table1 WITH 0 ROWS PERSISTENT FOR COLUMNS (LastName);
+ERROR HY000: WITH ... ROWS must have a positive number
+ANALYZE FAST TABLE Table1 SAMPLING 0 PERCENT PERSISTENT FOR COLUMNS (LastName);
+ERROR HY000: SAMPLING ... PERCENT must have a positive number
+ANALYZE FAST TABLE Table1 LASTS 0 SECONDS PERSISTENT FOR COLUMNS (LastName);
+ERROR HY000: LASTS ... SECONDS must have a positive number
+ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (LastName IN RANGE 0);
+ERROR HY000: IN RANGE ... must have a positive number
+DROP TABLE Table1;
