@@ -1,0 +1,15 @@
+--echo #
+--echo # Test for ANALYZE FAST query 
+--echo #
+
+CREATE TABLE Table1 (
+ PetName varchar(20),
+ LastName varchar(20),
+ FirstName varchar(20)
+);
+INSERT INTO Table1 VALUES ("Flufy", "Yates", "Maria");
+INSERT INTO Table1 VALUES ("Buttons", "David", "Jones");
+INSERT INTO Table1 VALUES ("Paws", "Johanson", "Samuel");
+SELECT * FROM Table1;
+ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (PetName);
+DROP TABLE Table1;
