@@ -913,8 +913,8 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  ACCESSIBLE_SYM
 %token  ACTION                        /* SQL-2003-N */
 %token  ADD                           /* SQL-2003-R */
-%token  ADMIN_SYM                     /* SQL-2003-N */
 %token  ADDDATE_SYM                   /* MYSQL-FUNC */
+%token  ADMIN_SYM                     /* SQL-2003-N */
 %token  AFTER_SYM                     /* SQL-2003-N */
 %token  AGAINST
 %token  AGGREGATE_SYM
@@ -930,8 +930,8 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  ASC                           /* SQL-2003-N */
 %token  ASCII_SYM                     /* MYSQL-FUNC */
 %token  ASENSITIVE_SYM                /* FUTURE-USE */
-%token  AT_SYM                        /* SQL-2003-R */
 %token  ATOMIC_SYM                    /* SQL-2003-R */
+%token  AT_SYM                        /* SQL-2003-R */
 %token  AUTHORS_SYM
 %token  AUTOEXTEND_SIZE_SYM
 %token  AUTO_INC
@@ -977,8 +977,8 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  CIPHER_SYM
 %token  CLASS_ORIGIN_SYM              /* SQL-2003-N */
 %token  CLIENT_SYM
-%token  CLOSE_SYM                     /* SQL-2003-R */
 %token  CLOB                          /* SQL-2003-R */
+%token  CLOSE_SYM                     /* SQL-2003-R */
 %token  COALESCE                      /* SQL-2003-N */
 %token  CODE_SYM
 %token  COLLATE_SYM                   /* SQL-2003-R */
@@ -989,8 +989,8 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  COLUMN_CREATE_SYM
 %token  COLUMN_DELETE_SYM
 %token  COLUMN_GET_SYM
-%token  COLUMN_SYM                    /* SQL-2003-R */
 %token  COLUMN_NAME_SYM               /* SQL-2003-N */
+%token  COLUMN_SYM                    /* SQL-2003-R */
 %token  COMMENT_SYM
 %token  COMMITTED_SYM                 /* SQL-2003-N */
 %token  COMMIT_SYM                    /* SQL-2003-R */
@@ -1017,12 +1017,12 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  CUBE_SYM                      /* SQL-2003-R */
 %token  CUME_DIST_SYM
 %token  CURDATE                       /* MYSQL-FUNC */
+%token  CURRENT_POS_SYM
+%token  CURRENT_ROLE                  /* SQL-2003-R */
 %token  CURRENT_SYM                   /* SQL-2003-R */
 %token  CURRENT_USER                  /* SQL-2003-R */
-%token  CURRENT_ROLE                  /* SQL-2003-R */
-%token  CURRENT_POS_SYM
-%token  CURSOR_SYM                    /* SQL-2003-R */
 %token  CURSOR_NAME_SYM               /* SQL-2003-N */
+%token  CURSOR_SYM                    /* SQL-2003-R */
 %token  CURTIME                       /* MYSQL-FUNC */
 %token  CYCLE_SYM
 %token  DATABASE
@@ -1062,10 +1062,10 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  DISK_SYM
 %token  DISTINCT                      /* SQL-2003-R */
 %token  DIV_SYM
+%token  DOT_DOT_SYM
 %token  DOUBLE_SYM                    /* SQL-2003-R */
 %token  DO_DOMAIN_IDS_SYM
 %token  DO_SYM
-%token  DOT_DOT_SYM
 %token  DROP                          /* SQL-2003-R */
 %token  DUAL_SYM
 %token  DUMPFILE
@@ -1084,19 +1084,19 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  ENGINE_SYM
 %token  ENUM
 %token  EQUAL_SYM                     /* OPERATOR */
-%token  ERROR_SYM
 %token  ERRORS
+%token  ERROR_SYM
 %token  ESCAPED
 %token  ESCAPE_SYM                    /* SQL-2003-R */
 %token  EVENTS_SYM
 %token  EVENT_SYM
 %token  EVERY_SYM                     /* SQL-2003-N */
-%token  EXCHANGE_SYM
 %token  EXAMINED_SYM
+%token  EXCEPTION_SYM                 /* SQL-2003-N, Oracle-PLSQL-R */
 %token  EXCEPT_SYM                    /* SQL-2003-R */
+%token  EXCHANGE_SYM
 %token  EXCLUDE_SYM                   /* SQL-2011-N */
 %token  EXECUTE_SYM                   /* SQL-2003-R */
-%token  EXCEPTION_SYM                 /* SQL-2003-N, Oracle-PLSQL-R */
 %token  EXISTS                        /* SQL-2003-R */
 %token  EXIT_SYM
 %token  EXPANSION_SYM
@@ -1109,19 +1109,19 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  FAULTS_SYM
 %token  FETCH_SYM                     /* SQL-2003-R */
 %token  FILE_SYM
-%token  FIRST_VALUE_SYM               /* SQL-2011 */
 %token  FIRST_SYM                     /* SQL-2003-N */
+%token  FIRST_VALUE_SYM               /* SQL-2011 */
 %token  FIXED_SYM
 %token  FLOAT_NUM
 %token  FLOAT_SYM                     /* SQL-2003-R */
 %token  FLUSH_SYM
-%token  FOLLOWS_SYM                   /* MYSQL trigger*/
 %token  FOLLOWING_SYM                 /* SQL-2011-N */
+%token  FOLLOWS_SYM                   /* MYSQL trigger*/
 %token  FORCE_SYM
 %token  FOREIGN                       /* SQL-2003-R */
+%token  FORMAT_SYM
 %token  FOR_SYM                       /* SQL-2003-R */
 %token  FOR_SYSTEM_TIME_SYM           /* INTERNAL */
-%token  FORMAT_SYM
 %token  FOUND_SYM                     /* SQL-2003-R */
 %token  FROM
 %token  FULL                          /* SQL-2003-R */
@@ -1138,10 +1138,8 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  GOTO_SYM                      /* Oracle, reserved in PL/SQL*/
 %token  GRANT                         /* SQL-2003-R */
 %token  GRANTS
-%token  GROUP_SYM                     /* SQL-2003-R */
 %token  GROUP_CONCAT_SYM
-%token  LAG_SYM                       /* SQL-2011 */
-%token  LEAD_SYM                      /* SQL-2011 */
+%token  GROUP_SYM                     /* SQL-2003-R */
 %token  HANDLER_SYM
 %token  HARD_SYM
 %token  HASH_SYM
@@ -1151,20 +1149,20 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  HEX_STRING
 %token  HIGH_PRIORITY
 %token  HISTORY_SYM                   /* MYSQL */
-%token  HOST_SYM
 %token  HOSTS_SYM
+%token  HOST_SYM
 %token  HOUR_MICROSECOND_SYM
 %token  HOUR_MINUTE_SYM
 %token  HOUR_SECOND_SYM
 %token  HOUR_SYM                      /* SQL-2003-R */
-%token  ID_SYM                        /* MYSQL */
 %token  IDENT
 %token  IDENTIFIED_SYM
 %token  IDENT_QUOTED
+%token  ID_SYM                        /* MYSQL */
 %token  IF_SYM
 %token  IGNORE_DOMAIN_IDS_SYM
-%token  IGNORE_SYM
 %token  IGNORE_SERVER_IDS_SYM
+%token  IGNORE_SYM
 %token  IMMEDIATE_SYM                 /* SQL-2003-R */
 %token  IMPORT
 %token  INCREMENT_SYM
@@ -1179,9 +1177,11 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  INSERT_METHOD
 %token  INSTALL_SYM
 %token  INTERSECT_SYM                 /* SQL-2003-R */
+%token  INTERVALS
 %token  INTERVAL_SYM                  /* SQL-2003-R */
 %token  INTO                          /* SQL-2003-R */
 %token  INT_SYM                       /* SQL-2003-R */
+%token  INVISIBLE_SYM
 %token  INVOKER_SYM
 %token  IN_SYM                        /* SQL-2003-R */
 %token  IO_SYM
@@ -1191,19 +1191,21 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  ISOPEN_SYM                    /* Oracle-N   */
 %token  ISSUER_SYM
 %token  ITERATE_SYM
-%token  INVISIBLE_SYM
 %token  JOIN_SYM                      /* SQL-2003-R */
 %token  JSON_SYM
 %token  KEYS
 %token  KEY_BLOCK_SIZE
 %token  KEY_SYM                       /* SQL-2003-N */
 %token  KILL_SYM
+%token  LAG_SYM                       /* SQL-2011 */
 %token  LANGUAGE_SYM                  /* SQL-2003-R */
+%token  LASTS                    
+%token  LASTVAL_SYM                   /* PostgreSQL sequence function */
 %token  LAST_SYM                      /* SQL-2003-N */
 %token  LAST_VALUE
-%token  LASTVAL_SYM                   /* PostgreSQL sequence function */
 %token  LE                            /* OPERATOR */
 %token  LEADING                       /* SQL-2003-R */
+%token  LEAD_SYM                      /* SQL-2011 */
 %token  LEAVES
 %token  LEAVE_SYM
 %token  LEFT                          /* SQL-2003-R */
@@ -1232,6 +1234,7 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  MASTER_CONNECT_RETRY_SYM
 %token  MASTER_DELAY_SYM
 %token  MASTER_GTID_POS_SYM
+%token  MASTER_HEARTBEAT_PERIOD_SYM
 %token  MASTER_HOST_SYM
 %token  MASTER_LOG_FILE_SYM
 %token  MASTER_LOG_POS_SYM
@@ -1242,25 +1245,24 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  MASTER_SSL_CA_SYM
 %token  MASTER_SSL_CERT_SYM
 %token  MASTER_SSL_CIPHER_SYM
-%token  MASTER_SSL_CRL_SYM
 %token  MASTER_SSL_CRLPATH_SYM
+%token  MASTER_SSL_CRL_SYM
 %token  MASTER_SSL_KEY_SYM
 %token  MASTER_SSL_SYM
 %token  MASTER_SSL_VERIFY_SERVER_CERT_SYM
 %token  MASTER_SYM
 %token  MASTER_USER_SYM
 %token  MASTER_USE_GTID_SYM
-%token  MASTER_HEARTBEAT_PERIOD_SYM
 %token  MATCH                         /* SQL-2003-R */
+%token  MAXVALUE_SYM                 /* SQL-2003-N */
 %token  MAX_CONNECTIONS_PER_HOUR
 %token  MAX_QUERIES_PER_HOUR
 %token  MAX_ROWS
 %token  MAX_SIZE_SYM
+%token  MAX_STATEMENT_TIME_SYM
 %token  MAX_SYM                       /* SQL-2003-N */
 %token  MAX_UPDATES_PER_HOUR
-%token  MAX_STATEMENT_TIME_SYM
 %token  MAX_USER_CONNECTIONS_SYM
-%token  MAXVALUE_SYM                 /* SQL-2003-N */
 %token  MEDIAN_SYM
 %token  MEDIUMBLOB
 %token  MEDIUMINT
@@ -1286,8 +1288,8 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  MULTIPOINT
 %token  MULTIPOLYGON
 %token  MUTEX_SYM
-%token  MYSQL_SYM
 %token  MYSQL_ERRNO_SYM
+%token  MYSQL_SYM
 %token  NAMES_SYM                     /* SQL-2003-N */
 %token  NAME_SYM                      /* SQL-2003-N */
 %token  NATIONAL_SYM                  /* SQL-2003-R */
@@ -1297,41 +1299,41 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  NE                            /* OPERATOR */
 %token  NEG
 %token  NEW_SYM                       /* SQL-2003-R */
-%token  NEXT_SYM                      /* SQL-2003-N */
 %token  NEXTVAL_SYM                   /* PostgreSQL sequence function */
+%token  NEXT_SYM                      /* SQL-2003-N */
 %token  NOCACHE_SYM
 %token  NOCYCLE_SYM
 %token  NODEGROUP_SYM
-%token  NONE_SYM                      /* SQL-2003-R */
-%token  NOT2_SYM
-%token  NOT_SYM                       /* SQL-2003-R */
-%token  NOTFOUND_SYM                  /* Oracle-R   */
-%token  NOW_SYM
-%token  NO_SYM                        /* SQL-2003-R */
 %token  NOMAXVALUE_SYM
 %token  NOMINVALUE_SYM
-%token  NO_WAIT_SYM
+%token  NONE_SYM                      /* SQL-2003-R */
+%token  NOT2_SYM
+%token  NOTFOUND_SYM                  /* Oracle-R   */
+%token  NOT_SYM                       /* SQL-2003-R */
 %token  NOWAIT_SYM
+%token  NOW_SYM
+%token  NO_SYM                        /* SQL-2003-R */
+%token  NO_WAIT_SYM
 %token  NO_WRITE_TO_BINLOG
+%token  NTH_VALUE_SYM                 /* SQL-2011 */
 %token  NTILE_SYM
 %token  NULL_SYM                      /* SQL-2003-R */
 %token  NUM
 %token  NUMBER_SYM                    /* SQL-2003-N */
 %token  NUMERIC_SYM                   /* SQL-2003-R */
-%token  NTH_VALUE_SYM                 /* SQL-2011 */
 %token  NVARCHAR_SYM
-%token  OF_SYM                        /* SQL-1992-R, Oracle-R */
 %token  OFFSET_SYM
+%token  OF_SYM                        /* SQL-1992-R, Oracle-R */
 %token  OLD_PASSWORD_SYM
 %token  ON                            /* SQL-2003-R */
 %token  ONE_SYM
-%token  ONLY_SYM                      /* SQL-2003-R */
 %token  ONLINE_SYM
+%token  ONLY_SYM                      /* SQL-2003-R */
 %token  OPEN_SYM                      /* SQL-2003-R */
 %token  OPTIMIZE
-%token  OPTIONS_SYM
 %token  OPTION                        /* SQL-2003-N */
 %token  OPTIONALLY
+%token  OPTIONS_SYM
 %token  OR2_SYM
 %token  ORDER_SYM                     /* SQL-2003-R */
 %token  OR_OR_SYM                     /* OPERATOR */
@@ -1344,19 +1346,20 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  OWNER_SYM
 %token  PACKAGE_SYM                   /* Oracle-R */
 %token  PACK_KEYS_SYM
-%token  PAGE_SYM
 %token  PAGE_CHECKSUM_SYM
+%token  PAGE_SYM
 %token  PARAM_MARKER
 %token  PARSER_SYM
 %token  PARSE_VCOL_EXPR_SYM
 %token  PARTIAL                       /* SQL-2003-N */
-%token  PARTITION_SYM                 /* SQL-2003-R */
-%token  PARTITIONS_SYM
 %token  PARTITIONING_SYM
+%token  PARTITIONS_SYM
+%token  PARTITION_SYM                 /* SQL-2003-R */
 %token  PASSWORD_SYM
-%token  PERCENT_RANK_SYM
+%token  PERCENT                     
 %token  PERCENTILE_CONT_SYM
 %token  PERCENTILE_DISC_SYM
+%token  PERCENT_RANK_SYM
 %token  PERIOD_SYM                    /* SQL-2011-R */
 %token  PERSISTENT_SYM
 %token  PHASE_SYM
@@ -1371,15 +1374,15 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  PRECISION                     /* SQL-2003-R */
 %token  PREPARE_SYM                   /* SQL-2003-R */
 %token  PRESERVE_SYM
-%token  PREV_SYM
 %token  PREVIOUS_SYM
+%token  PREV_SYM
 %token  PRIMARY_SYM                   /* SQL-2003-R */
 %token  PRIVILEGES                    /* SQL-2003-N */
 %token  PROCEDURE_SYM                 /* SQL-2003-R */
 %token  PROCESS
 %token  PROCESSLIST_SYM
-%token  PROFILE_SYM
 %token  PROFILES_SYM
+%token  PROFILE_SYM
 %token  PROXY_SYM
 %token  PURGE
 %token  QUARTER_SYM
@@ -1401,6 +1404,7 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  REDO_BUFFER_SIZE_SYM
 %token  REDUNDANT_SYM
 %token  REFERENCES                    /* SQL-2003-R */
+%token  REF_SYSTEM_ID_SYM
 %token  REGEXP
 %token  RELAY
 %token  RELAYLOG_SYM
@@ -1419,9 +1423,9 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  REPLICATION
 %token  REQUIRE_SYM
 %token  RESET_SYM
-%token  RESTART_SYM
 %token  RESIGNAL_SYM                  /* SQL-2003-R */
 %token  RESOURCES
+%token  RESTART_SYM
 %token  RESTORE_SYM
 %token  RESTRICT
 %token  RESUME_SYM
@@ -1438,16 +1442,18 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  ROLLUP_SYM                    /* SQL-2003-R */
 %token  ROUTINE_SYM                   /* SQL-2003-N */
 %token  ROWCOUNT_SYM                  /* Oracle-N   */
-%token  ROW_SYM                       /* SQL-2003-R */
 %token  ROWS_SYM                      /* SQL-2003-R */
 %token  ROWTYPE_SYM                   /* Oracle-PLSQL-R */
 %token  ROW_COUNT_SYM                 /* SQL-2003-N */
 %token  ROW_FORMAT_SYM
 %token  ROW_NUMBER_SYM
+%token  ROW_SYM                       /* SQL-2003-R */
 %token  RTREE_SYM
+%token  SAMPLING 
 %token  SAVEPOINT_SYM                 /* SQL-2003-R */
 %token  SCHEDULE_SYM
 %token  SCHEMA_NAME_SYM               /* SQL-2003-N */
+%token  SECONDS
 %token  SECOND_MICROSECOND_SYM
 %token  SECOND_SYM                    /* SQL-2003-R */
 %token  SECURITY_SYM                  /* SQL-2003-N */
@@ -1457,9 +1463,9 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  SEQUENCE_SYM
 %token  SERIALIZABLE_SYM              /* SQL-2003-N */
 %token  SERIAL_SYM
-%token  SESSION_SYM                   /* SQL-2003-N */
-%token  SERVER_SYM
 %token  SERVER_OPTIONS
+%token  SERVER_SYM
+%token  SESSION_SYM                   /* SQL-2003-N */
 %token  SET                           /* SQL-2003-R */
 %token  SETVAL_SYM                    /* PostgreSQL sequence function */
 %token  SET_VAR
@@ -1495,7 +1501,6 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  SQL_SMALL_RESULT
 %token  SQL_SYM                       /* SQL-2003-R */
 %token  SQL_THREAD
-%token  REF_SYSTEM_ID_SYM
 %token  SSL_SYM
 %token  STARTING
 %token  STARTS_SYM
@@ -1528,10 +1533,10 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  SYSTEM_TIME_SYM               /* SQL-2011-R */
 %token  TABLES
 %token  TABLESPACE
-%token  TABLE_REF_PRIORITY
-%token  TABLE_SYM                     /* SQL-2003-R */
 %token  TABLE_CHECKSUM_SYM
 %token  TABLE_NAME_SYM                /* SQL-2003-N */
+%token  TABLE_REF_PRIORITY
+%token  TABLE_SYM                     /* SQL-2003-R */
 %token  TEMPORARY                     /* SQL-2003-N */
 %token  TEMPTABLE_SYM
 %token  TERMINATED
@@ -1549,8 +1554,8 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  TINYTEXT
 %token  TO_SYM                        /* SQL-2003-R */
 %token  TRAILING                      /* SQL-2003-R */
-%token  TRANSACTION_SYM
 %token  TRANSACTIONAL_SYM
+%token  TRANSACTION_SYM
 %token  TRIGGERS_SYM
 %token  TRIGGER_SYM                   /* SQL-2003-R */
 %token  TRIM                          /* SQL-2003-N */
@@ -1606,8 +1611,8 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 %token  WEIGHT_STRING_SYM
 %token  WHEN_SYM                      /* SQL-2003-R */
 %token  WHERE                         /* SQL-2003-R */
-%token  WINDOW_SYM
 %token  WHILE_SYM
+%token  WINDOW_SYM
 %token  WITH                          /* SQL-2003-R */
 %token  WITHIN
 %token  WITHOUT                       /* SQL-2003-R */
@@ -1749,7 +1754,8 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
         ws_level_range ws_level_list_or_range bool
 
 %type <ulonglong_number>
-        ulonglong_num real_ulonglong_num size_number
+        ulonglong_num real_ulonglong_num size_number opt_number_of_rows
+        opt_sampling_percentage opt_duration column_range column_intervals  
 
 %type <longlong_number>
         longlong_num
@@ -1960,7 +1966,7 @@ bool my_yyoverflow(short **a, YYSTYPE **b, size_t *yystacksize);
 	opt_lock_wait_timeout
         opt_delete_gtid_domain
 	asrow_attribute
-END_OF_INPUT
+END_OF_INPUT column column_or_columns
 
 %type <NONE> call sp_proc_stmts sp_proc_stmts1 sp_proc_stmt
 %type <NONE> sp_proc_stmt_statement sp_proc_stmt_return
@@ -8593,6 +8599,112 @@ analyze:
             lex->m_sql_cmd= new (thd->mem_root) Sql_cmd_analyze_table();
             if (lex->m_sql_cmd == NULL)
               MYSQL_YYABORT;
+          }
+
+          /* facut de moi */
+
+        | ANALYZE_SYM FAST_SYM TABLE_SYM table_name opt_number_of_rows
+          opt_sampling_percentage opt_duration
+          PERSISTENT_SYM FOR_SYM COLUMNS
+          {  
+            LEX *lex=Lex;
+            lex->sql_command = SQLCOM_ANALYZE;
+            lex->check_opt.init();
+            lex->alter_info.reset();
+            lex->column_list= new (thd->mem_root) List<LEX_STRING>;
+            if (lex->column_list == NULL)
+              MYSQL_YYABORT;
+            thd->lex->with_persistent_for_clause= TRUE;
+            // !!TEMPORARY!!
+            // For the moment it is executing the ANALYZE TABLE code.
+            // If 'with_persistent_for_clause' is not true, it will select
+            // all the columns.
+          }
+          '(' column_or_columns ')'
+          {
+            LEX* lex= thd->lex;
+            DBUG_ASSERT(!lex->m_sql_cmd);
+            lex->m_sql_cmd= new (thd->mem_root) Sql_cmd_analyze_table();
+            if (lex->m_sql_cmd == NULL)
+              MYSQL_YYABORT;
+          }
+        ;
+
+opt_number_of_rows:
+          /* empty */    { $$ = 0; }
+        | WITH ulonglong_num ROWS_SYM 
+          { 
+            if ($2 == 0)
+            { 
+              my_error(ER_POSITIVE_NUMBER, MYF(0), "WITH ... ROWS");
+              MYSQL_YYABORT;
+            }
+            $$ = $2;
+          }
+        ;
+
+opt_sampling_percentage:
+          /* empty */    { $$ = 0; }
+        | SAMPLING ulonglong_num PERCENT
+          { 
+            if ($2 == 0)
+            { 
+              my_error(ER_POSITIVE_NUMBER, MYF(0), "SAMPLING ... PERCENT");
+              MYSQL_YYABORT;
+            }
+            $$ = $2;
+          }
+        ;
+
+opt_duration:
+          /* empty */    { $$ = 0;}
+        | LASTS ulonglong_num SECONDS
+          { 
+            if ($2 == 0)
+            { 
+              my_error(ER_POSITIVE_NUMBER, MYF(0), "LASTS ... SECONDS");
+              MYSQL_YYABORT;
+            }
+            $$ = $2;
+          }
+        ;
+
+column_or_columns:
+          column         { } 
+        | column_or_columns ',' column { }
+        ;
+
+column:
+          ident column_range column_intervals
+          {
+            Lex->column_list->push_back((LEX_STRING*)
+                thd->memdup(&$1, sizeof(LEX_STRING)), thd->mem_root);
+          }
+        ;
+
+column_range:
+          /* empty */    { $$ = 0; }
+        | IN_SYM RANGE_SYM ulonglong_num
+          { 
+            if ($3 == 0)
+            { 
+              my_error(ER_POSITIVE_NUMBER, MYF(0), "IN RANGE ...");
+              MYSQL_YYABORT;
+            }
+            $$ = $3;
+          }
+        ;
+
+column_intervals:
+          /* empty */    { $$ = 0; }
+        | WITH ulonglong_num INTERVALS
+          { 
+            if ($2 == 0)
+            { 
+              my_error(ER_POSITIVE_NUMBER, MYF(0), "WITH ... INTERVALS");
+              MYSQL_YYABORT;
+            }
+            $$ = $2;
           }
         ;
 
