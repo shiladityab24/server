@@ -8605,12 +8605,24 @@ analyze:
 
         | ANALYZE_SYM FAST_SYM TABLE_SYM table_name opt_number_of_rows
           opt_sampling_percentage opt_duration
-          PERSISTENT_SYM FOR_SYM COLUMNS '(' column_or_columns ')'
+          PERSISTENT_SYM FOR_SYM COLUMNS
           {  
             LEX *lex=Lex;
             lex->sql_command = SQLCOM_ANALYZE;
             lex->check_opt.init();
             lex->alter_info.reset();
+            lex->column_list= new (thd->mem_root) List<LEX_STRING>;
+            if (lex->column_list == NULL)
+              MYSQL_YYABORT;
+            thd->lex->with_persistent_for_clause= TRUE;
+            // !!TEMPORARY!!
+            // For the moment it is executing the ANALYZE TABLE code.
+            // If 'with_persistent_for_clause' is not true, it will select
+            // all the columns.
+          }
+          '(' column_or_columns ')'
+          {
+            LEX* lex= thd->lex;
             DBUG_ASSERT(!lex->m_sql_cmd);
             lex->m_sql_cmd= new (thd->mem_root) Sql_cmd_analyze_table();
             if (lex->m_sql_cmd == NULL)
