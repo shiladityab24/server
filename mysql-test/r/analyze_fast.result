@@ -17,7 +17,7 @@ PetName	LastName	FirstName
 Flufy	Yates	Maria
 Buttons	David	Jones
 Paws	Johanson	Samuel
-ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (PetName, LastName);
+ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (PetName);
 Table	Op	Msg_type	Msg_text
 test.Table1	analyze	status	Engine-independent statistics collected
 test.Table1	analyze	status	OK
