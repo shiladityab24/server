@@ -1,0 +1,18 @@
+--echo #
+--echo # Bug #XXXXXX: INET_ATON() returns signed, not unsigned
+--echo #
+
+CREATE TABLE Table1 (
+ PetName varchar(20),
+ LastName varchar(20),
+ FirstName varchar(20)
+);
+
+INSERT INTO Table1 VALUES ("Flufy", "Yates", "Maria");
+INSERT INTO Table1 VALUES ("Buttons", "David", "Jones");
+INSERT INTO Table1 VALUES ("Paws", "Johanson", "Samuel");
+SELECT * FROM Table1;
+
+ANALYZE TABLE Table1 PERSISTENT FOR COLUMNS (LastName,FirstName) INDEXES ();
+
+DROP TABLE Table1;

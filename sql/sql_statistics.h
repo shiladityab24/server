@@ -90,6 +90,7 @@ Use_stat_tables_mode get_use_stat_tables_mode(THD *thd)
 
 int read_statistics_for_tables_if_needed(THD *thd, TABLE_LIST *tables);
 int collect_statistics_for_table(THD *thd, TABLE *table);
+int collect_statistics_fast_for_table(THD *thd, TABLE *table);
 int alloc_statistics_for_table_share(THD* thd, TABLE_SHARE *share,
                                      bool is_safe);
 int alloc_statistics_for_table(THD *thd, TABLE *table);

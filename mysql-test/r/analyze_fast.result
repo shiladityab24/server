@@ -19,8 +19,8 @@ Buttons	David	Jones
 Paws	Johanson	Samuel
 ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (PetName);
 Table	Op	Msg_type	Msg_text
-test.Table1	analyze	status	Engine-independent statistics collected
-test.Table1	analyze	status	OK
+test.Table1	analyze_fast	status	Engine-independent statistics collected
+test.Table1	analyze_fast	status	OK
 ANALYZE FAST TABLE Table1 WITH 0 ROWS PERSISTENT FOR COLUMNS (LastName);
 ERROR HY000: WITH ... ROWS must have a positive number
 ANALYZE FAST TABLE Table1 SAMPLING 0 PERCENT PERSISTENT FOR COLUMNS (LastName);

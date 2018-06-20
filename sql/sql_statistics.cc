@@ -2656,6 +2656,118 @@ int collect_statistics_for_index(THD *thd, TABLE *table, uint index)
   DBUG_RETURN(rc);
 }
 
+/**
+  @brief 
+  Collect statistical data really fast for a table
+
+  @param
+  thd         The thread handle
+  @param
+  table       The table to collect statistics on
+*/
+
+int collect_statistics_fast_for_table(THD *thd, TABLE *table)
+{
+  int rc;
+  Field **field_ptr;
+  Field *table_field;
+  ha_rows rows= 0;
+  handler *file=table->file;
+
+  DBUG_ENTER("collect_statistics_for_table");
+
+  table->collected_stats->cardinality_is_null= TRUE;
+  table->collected_stats->cardinality= 0;
+
+  for (field_ptr= table->field; *field_ptr; field_ptr++)
+  {
+    table_field= *field_ptr;   
+    if (!bitmap_is_set(table->read_set, table_field->field_index))
+      continue; 
+    table_field->collected_stats->init(thd, table_field);
+  }
+
+  restore_record(table, s->default_values);
+
+  /* Perform a full table scan to collect statistics on 'table's columns */
+  if (!(rc= file->ha_rnd_init(TRUE)))
+  {  
+    DEBUG_SYNC(table->in_use, "statistics_collection_start");
+
+    while ((rc= file->ha_rnd_next(table->record[0])) != HA_ERR_END_OF_FILE)
+    {
+      if (thd->killed)
+        break;
+
+      if (rc)
+      {
+        if (rc == HA_ERR_RECORD_DELETED)
+          continue;
+        break;
+      }
+
+      for (field_ptr= table->field; *field_ptr; field_ptr++)
+      {
+        table_field= *field_ptr;
+        if (!bitmap_is_set(table->read_set, table_field->field_index))
+          continue;  
+        if ((rc= table_field->collected_stats->add(rows)))
+          break;
+      }
+      if (rc)
+        break;
+      rows++;
+    }
+    file->ha_rnd_end();
+  }
+  rc= (rc == HA_ERR_END_OF_FILE && !thd->killed) ? 0 : 1;
+
+  /* 
+    Calculate values for all statistical characteristics on columns and
+    and for each field f of 'table' save them in the write_stat structure
+    from the Field object for f. 
+  */
+  if (!rc)
+  {
+    table->collected_stats->cardinality_is_null= FALSE;
+    table->collected_stats->cardinality= rows;
+  }
+
+  bitmap_clear_all(table->write_set);
+  for (field_ptr= table->field; *field_ptr; field_ptr++)
+  {
+    table_field= *field_ptr;
+    if (!bitmap_is_set(table->read_set, table_field->field_index))
+      continue;
+    bitmap_set_bit(table->write_set, table_field->field_index); 
+    if (!rc)
+      table_field->collected_stats->finish(rows);
+    else
+      table_field->collected_stats->cleanup();
+  }
+  bitmap_clear_all(table->write_set);
+
+  if (!rc)
+  {
+    uint key;
+    key_map::Iterator it(table->keys_in_use_for_query);
+
+    MY_BITMAP *save_read_set= table->read_set;
+    table->read_set= &table->tmp_set;
+    bitmap_set_all(table->read_set);
+     
+    /* Collect statistics for indexes */
+    while ((key= it++) != key_map::Iterator::BITMAP_END)
+    {
+      if ((rc= collect_statistics_for_index(thd, table, key)))
+        break;
+    }
+
+    table->read_set= save_read_set;
+  }
+
+  DBUG_RETURN(rc);          
+}
 
 /**
   @brief 
