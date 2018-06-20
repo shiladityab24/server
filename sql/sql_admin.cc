@@ -877,11 +877,21 @@ static bool mysql_admin_table(THD* thd, TABLE_LIST* tables,
           }
           tab->file->column_bitmaps_signal();
         }
-        if (!(compl_result_code=
-              alloc_statistics_for_table(thd, table->table)) &&
-            !(compl_result_code=
-              collect_statistics_for_table(thd, table->table)))
-          compl_result_code= update_statistics_for_table(thd, table->table);
+        if (strcmp("analyze", operator_name) == 0) {
+         if (!(compl_result_code=
+               alloc_statistics_for_table(thd, table->table)) &&
+             !(compl_result_code=
+               collect_statistics_for_table(thd, table->table)))
+           compl_result_code= update_statistics_for_table(thd, table->table);
+        } else if (strcmp("analyze_fast", operator_name) == 0) {
+         if (!(compl_result_code=
+               alloc_statistics_for_table(thd, table->table)) &&
+             !(compl_result_code=
+               collect_fast_statistics_for_table(thd, table->table)))
+           compl_result_code= update_statistics_for_table(thd, table->table);
+        } else {
+         compl_result_code= HA_ADMIN_FAILED;
+        }
       }
       else
         compl_result_code= HA_ADMIN_FAILED;
@@ -1291,6 +1301,36 @@ bool mysql_preload_keys(THD* thd, TABLE_LIST* tables)
 				&handler::preload_keys, 0));
 }
 
+
+bool Sql_cmd_analyze_fast_table::execute(THD *thd)
+{
+  LEX *m_lex= thd->lex;
+  TABLE_LIST *first_table= m_lex->select_lex.table_list.first;
+  bool res= TRUE;
+  thr_lock_type lock_type = TL_READ_NO_INSERT;
+  DBUG_ENTER("Sql_cmd_analyze_fast_table::execute");
+
+  if (check_table_access(thd, SELECT_ACL | INSERT_ACL, first_table,
+                         FALSE, UINT_MAX, FALSE))
+    goto error;
+  WSREP_TO_ISOLATION_BEGIN_WRTCHK(NULL, NULL, first_table);
+  res= mysql_admin_table(thd, first_table, &m_lex->check_opt,
+                         "analyze_fast", lock_type, 1, 0, 0, 0,
+                         &handler::ha_analyze, 0);
+  /* ! we write after unlocking the table */
+  if (!res && !m_lex->no_write_to_binlog)
+  {
+    /*
+      Presumably, ANALYZE and binlog writing doesn't require synchronization
+    */
+    res= write_bin_log(thd, TRUE, thd->query(), thd->query_length());
+  }
+  m_lex->select_lex.table_list.first= first_table;
+  m_lex->query_tables= first_table;
+
+error:
+  DBUG_RETURN(res);
+}
 
 bool Sql_cmd_analyze_table::execute(THD *thd)
 {

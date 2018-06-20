@@ -26,6 +26,28 @@ int reassign_keycache_tables(THD* thd, KEY_CACHE *src_cache,
                              KEY_CACHE *dst_cache);
 
 /**
+  Sql_cmd_analyze_table represents the ANALYZE FAST TABLE statement.
+*/
+class Sql_cmd_analyze_fast_table : public Sql_cmd
+{
+public:
+  /**
+    Constructor, used to represent a ANALYZE TABLE statement.
+  */
+  Sql_cmd_analyze_fast_table()
+  {}
+
+  ~Sql_cmd_analyze_fast_table()
+  {}
+
+  bool execute(THD *thd);
+
+  virtual enum_sql_command sql_command_code() const
+  {
+    return SQLCOM_ANALYZE;
+  }
+};
+/**
   Sql_cmd_analyze_table represents the ANALYZE TABLE statement.
 */
 class Sql_cmd_analyze_table : public Sql_cmd

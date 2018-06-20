@@ -8601,8 +8601,6 @@ analyze:
               MYSQL_YYABORT;
           }
 
-          /* facut de moi */
-
         | ANALYZE_SYM FAST_SYM TABLE_SYM table_name opt_number_of_rows
           opt_sampling_percentage opt_duration
           PERSISTENT_SYM FOR_SYM COLUMNS
@@ -8624,7 +8622,7 @@ analyze:
           {
             LEX* lex= thd->lex;
             DBUG_ASSERT(!lex->m_sql_cmd);
-            lex->m_sql_cmd= new (thd->mem_root) Sql_cmd_analyze_table();
+            lex->m_sql_cmd= new (thd->mem_root) Sql_cmd_analyze_fast_table();
             if (lex->m_sql_cmd == NULL)
               MYSQL_YYABORT;
           }
