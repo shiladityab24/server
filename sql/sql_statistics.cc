@@ -319,14 +319,21 @@ private:
   Count_distinct_field *count_distinct; /* The container for distinct 
                                            column values */
 
+
   bool is_single_pk_col; /* TRUE <-> the only column of the primary key */ 
 
 public:
 
+  /* Functions used for building the Height Balanced Histogram */
   inline void init(THD *thd, Field * table_field);
   inline bool add(ha_rows rowno);
   inline void finish(ha_rows rows); 
   inline void cleanup();
+  /* Functions used for building the Width Balanced Histogram */
+  inline void init_wb(THD *thd, Field * table_field);
+  inline bool add_wb(ha_rows rowno);
+  inline bool put_value_in_bin(); 
+  inline void finish_wb(); 
 };
 
 
@@ -2468,6 +2475,26 @@ void Column_statistics_collected::init(THD *thd, Field *table_field)
     count_distinct= NULL;
 }
 
+inline
+void Column_statistics_collected::init_wb(THD *thd, Field *table_field)
+{
+  TABLE *table= table_field->table;
+  uint pk= table->s->primary_key;
+  is_single_pk_col= FALSE;
+
+  if (pk != MAX_KEY && table->key_info[pk].user_defined_key_parts == 1 &&
+      table->key_info[pk].key_part[0].fieldnr == table_field->field_index + 1)
+    is_single_pk_col= TRUE;  
+  
+  column= table_field;
+  set_all_nulls();
+  nulls= 0;
+  column_total_length= 0;
+  count_distinct= NULL;
+  histogram.malloc_bins();
+  histogram.set_no_samples(0);
+}
+
 
 /**
   @brief
@@ -2486,15 +2513,61 @@ bool Column_statistics_collected::add(ha_rows rowno)
     nulls++;
   else
   {
+    /* Adds to the total_column_length the number of bytes that store the
+       column value */
     column_total_length+= column->value_length();
+    /* Updates the minimum value of the column */
     if (min_value && column->update_min(min_value, rowno == nulls))
       set_not_null(COLUMN_STAT_MIN_VALUE);
+    /* Updates the maximum value of the column */
     if (max_value && column->update_max(max_value, rowno == nulls))
       set_not_null(COLUMN_STAT_MAX_VALUE);
+    /* Collect the distinct values from each column field and adds them to the
+       count_distinct tree */
     if (count_distinct)
       err= count_distinct->add();
   } 
   return err;
+}
+
+inline
+bool Column_statistics_collected::add_wb(ha_rows rowno)
+{
+  bool err= 0;
+  if (column->is_null())
+    nulls++;
+  else
+  {
+    /* Adds to the total_column_length the number of bytes that store the
+       column value */
+    column_total_length+= column->value_length();
+    /* Updates the minimum value of the column */
+    if (min_value && column->update_min(min_value, rowno == nulls))
+      set_not_null(COLUMN_STAT_MIN_VALUE);
+    /* Updates the maximum value of the column */
+    if (max_value && column->update_max(max_value, rowno == nulls))
+      set_not_null(COLUMN_STAT_MAX_VALUE);
+  } 
+  return err;
+}
+
+
+
+/**
+  @brief
+  Add values in buckets.
+  
+  @param
+*/
+
+inline
+bool Column_statistics_collected::put_value_in_bin()
+{
+  ulonglong val = column->val_uint();
+  ulonglong maxval = max_value->val_uint();
+  ulonglong minval = min_value->val_uint();
+  histogram.put_value_in_bin(val, maxval, minval); 
+  return 0;
 }
 
 
@@ -2511,18 +2584,21 @@ void Column_statistics_collected::finish(ha_rows rows)
 {
   double val;
 
+  /* Sets the percentage of nulls in the column */
   if (rows)
   {
      val= (double) nulls / rows;
      set_nulls_ratio(val);
      set_not_null(COLUMN_STAT_NULLS_RATIO);
   }
+  /* Sets the average length of a column value */
   if (rows - nulls)
   {
      val= (double) column_total_length / (rows - nulls);
      set_avg_length(val);
      set_not_null(COLUMN_STAT_AVG_LENGTH);
   }
+  /* */
   if (count_distinct)
   {
     ulonglong distincts;
@@ -2556,6 +2632,14 @@ void Column_statistics_collected::finish(ha_rows rows)
     set_avg_frequency(val); 
     set_not_null(COLUMN_STAT_AVG_FREQUENCY);
   } 
+}
+
+inline
+void Column_statistics_collected::finish_wb()
+{
+   histogram.malloc_values();
+   histogram.store_wb();
+   histogram.free_bins();
 }
 
 
@@ -2658,7 +2742,8 @@ int collect_statistics_for_index(THD *thd, TABLE *table, uint index)
 
 /**
   @brief 
-  Collect statistical data really fast for a table
+  Collect fast statistical data from the table. The genereated histogram is
+  an Equal-Width Histogram (also known as Width-Balanced Histogram).
 
   @param
   thd         The thread handle
@@ -2666,7 +2751,7 @@ int collect_statistics_for_index(THD *thd, TABLE *table, uint index)
   table       The table to collect statistics on
 */
 
-int collect_statistics_fast_for_table(THD *thd, TABLE *table)
+int collect_fast_statistics_for_table(THD *thd, TABLE *table)
 {
   int rc;
   Field **field_ptr;
@@ -2674,25 +2759,31 @@ int collect_statistics_fast_for_table(THD *thd, TABLE *table)
   ha_rows rows= 0;
   handler *file=table->file;
 
-  DBUG_ENTER("collect_statistics_for_table");
+  DBUG_ENTER("collect_fast_statistics_for_table");
 
   table->collected_stats->cardinality_is_null= TRUE;
   table->collected_stats->cardinality= 0;
 
+  /* Initialize the fields that collect statistics */
   for (field_ptr= table->field; *field_ptr; field_ptr++)
   {
     table_field= *field_ptr;   
     if (!bitmap_is_set(table->read_set, table_field->field_index))
       continue; 
-    table_field->collected_stats->init(thd, table_field);
+    table_field->collected_stats->init_wb(thd, table_field);
   }
 
   restore_record(table, s->default_values);
 
-  /* Perform a full table scan to collect statistics on 'table's columns */
+  /*
+    Perform a full table scan to collect statistics on 'table's columns 
+    The statistics collected are: the total length (bytes) of the column,
+    the minimum column value, the maximum column value and the distinct values
+    from each field
+  */
   if (!(rc= file->ha_rnd_init(TRUE)))
   {  
-    DEBUG_SYNC(table->in_use, "statistics_collection_start");
+    DEBUG_SYNC(table->in_use, "min_and_max_collection");
 
     while ((rc= file->ha_rnd_next(table->record[0])) != HA_ERR_END_OF_FILE)
     {
@@ -2711,7 +2802,7 @@ int collect_statistics_fast_for_table(THD *thd, TABLE *table)
         table_field= *field_ptr;
         if (!bitmap_is_set(table->read_set, table_field->field_index))
           continue;  
-        if ((rc= table_field->collected_stats->add(rows)))
+        if ((rc= table_field->collected_stats->add_wb(rows)))
           break;
       }
       if (rc)
@@ -2722,50 +2813,51 @@ int collect_statistics_fast_for_table(THD *thd, TABLE *table)
   }
   rc= (rc == HA_ERR_END_OF_FILE && !thd->killed) ? 0 : 1;
 
-  /* 
-    Calculate values for all statistical characteristics on columns and
-    and for each field f of 'table' save them in the write_stat structure
-    from the Field object for f. 
-  */
   if (!rc)
   {
     table->collected_stats->cardinality_is_null= FALSE;
     table->collected_stats->cardinality= rows;
   }
 
-  bitmap_clear_all(table->write_set);
+  /* Starts placing each table value in buckets */
+  if (!(rc= file->ha_rnd_init(TRUE)))
+  {  
+    DEBUG_SYNC(table->in_use, "fast_statistics_collection_start");
+
+    while ((rc= file->ha_rnd_next(table->record[0])) != HA_ERR_END_OF_FILE)
+    {
+      if (thd->killed)
+        break;
+
+      if (rc)
+      {
+        if (rc == HA_ERR_RECORD_DELETED)
+          continue;
+        break;
+      }
+
+      for (field_ptr= table->field; *field_ptr; field_ptr++)
+      {
+        table_field= *field_ptr;
+        if (!bitmap_is_set(table->read_set, table_field->field_index))
+          continue;  
+        if ((rc= table_field->collected_stats->put_value_in_bin()))
+          break;
+      }
+      if (rc)
+        break;
+    }
+    file->ha_rnd_end();
+  }
+  rc= (rc == HA_ERR_END_OF_FILE && !thd->killed) ? 0 : 1;
   for (field_ptr= table->field; *field_ptr; field_ptr++)
   {
     table_field= *field_ptr;
     if (!bitmap_is_set(table->read_set, table_field->field_index))
       continue;
-    bitmap_set_bit(table->write_set, table_field->field_index); 
-    if (!rc)
-      table_field->collected_stats->finish(rows);
-    else
-      table_field->collected_stats->cleanup();
+    table_field->collected_stats->finish_wb();
   }
   bitmap_clear_all(table->write_set);
-
-  if (!rc)
-  {
-    uint key;
-    key_map::Iterator it(table->keys_in_use_for_query);
-
-    MY_BITMAP *save_read_set= table->read_set;
-    table->read_set= &table->tmp_set;
-    bitmap_set_all(table->read_set);
-     
-    /* Collect statistics for indexes */
-    while ((key= it++) != key_map::Iterator::BITMAP_END)
-    {
-      if ((rc= collect_statistics_for_index(thd, table, key)))
-        break;
-    }
-
-    table->read_set= save_read_set;
-  }
-
   DBUG_RETURN(rc);          
 }
 
@@ -2834,6 +2926,7 @@ int collect_statistics_for_table(THD *thd, TABLE *table)
   table->collected_stats->cardinality_is_null= TRUE;
   table->collected_stats->cardinality= 0;
 
+  /* Initialize the fields that collect statistics */
   for (field_ptr= table->field; *field_ptr; field_ptr++)
   {
     table_field= *field_ptr;   
@@ -2844,7 +2937,10 @@ int collect_statistics_for_table(THD *thd, TABLE *table)
 
   restore_record(table, s->default_values);
 
-  /* Perform a full table scan to collect statistics on 'table's columns */
+  /* Perform a full table scan to collect statistics on 'table's columns 
+     The statistics collected are: the total length (bytes) of the column,
+     the minimum column value, the maximum column value and the distinct values
+     from each field */
   if (!(rc= file->ha_rnd_init(TRUE)))
   {  
     DEBUG_SYNC(table->in_use, "statistics_collection_start");
@@ -2877,16 +2973,15 @@ int collect_statistics_for_table(THD *thd, TABLE *table)
   }
   rc= (rc == HA_ERR_END_OF_FILE && !thd->killed) ? 0 : 1;
 
-  /* 
-    Calculate values for all statistical characteristics on columns and
-    and for each field f of 'table' save them in the write_stat structure
-    from the Field object for f. 
-  */
   if (!rc)
   {
     table->collected_stats->cardinality_is_null= FALSE;
     table->collected_stats->cardinality= rows;
   }
+
+  /* Calculate values for all statistical characteristics on columns and
+     and for each field f of 'table' save them in the write_stat structure
+     from the Field object for f */
 
   bitmap_clear_all(table->write_set);
   for (field_ptr= table->field; *field_ptr; field_ptr++)

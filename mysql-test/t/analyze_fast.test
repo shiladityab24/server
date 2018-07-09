@@ -7,15 +7,31 @@ DROP TABLE IF EXISTS Table1;
 CREATE TABLE Table1 (
  PetName varchar(20),
  LastName varchar(20),
- FirstName varchar(20)
+ FirstName varchar(20),
+ PetAge int unsigned, 
+ NumberOfPuppies int unsigned
 );
 
-INSERT INTO Table1 VALUES ("Flufy", "Yates", "Maria");
-INSERT INTO Table1 VALUES ("Buttons", "David", "Jones");
-INSERT INTO Table1 VALUES ("Paws", "Johanson", "Samuel");
+INSERT INTO Table1 VALUES
+("Flufy",   "Yates",     "Maria",   4, 12),
+("Buttons", "David",     "Jones",   5, 10),
+("Paws",    "Johanson",  "Samuel",  9, 20),
+("Gina",    "Marry",     "Carl",    4 ,51),
+("Rusa",    "June",      "Rick",    2 ,23),
+("Alpha",   "July",      "Marty",   3 ,23),
+("Bravo",   "August",    "Michael", 6 ,24),
+("Charlie", "September", "John",    5 ,52),
+("Delta",   "October",   "Sam",     6 ,62),
+("Hector",  "November",  "Andrew",  5 ,12);
+
 SELECT * FROM Table1;
 
-ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (PetName);
+set histogram_size=3;
+
+ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (PetAge, NumberOfPuppies);
+
+select min_value, max_value, hist_type, hex(histogram), decode_histogram(hist_type, histogram)
+from mysql.column_stats where table_name='Table1' and column_name='PetAge';
 
 --error ER_POSITIVE_NUMBER
 ANALYZE FAST TABLE Table1 WITH 0 ROWS PERSISTENT FOR COLUMNS (LastName);

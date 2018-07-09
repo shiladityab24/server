@@ -27,8 +27,10 @@ enum enum_use_stat_tables_mode
 typedef
 enum enum_histogram_type
 {
-  SINGLE_PREC_HB,
-  DOUBLE_PREC_HB
+  SINGLE_PREC_HB, // single precision height-balanced (equal-height)
+  DOUBLE_PREC_HB, // double precision height-balanced (equal-height)
+  SINGLE_PREC_WB, // single precision width-balanced (equal-width)
+  DOUBLE_PREC_WB, // double precision width-balanced (equal-width)
 } Histogram_type;
 
 enum enum_stat_tables
@@ -90,7 +92,7 @@ Use_stat_tables_mode get_use_stat_tables_mode(THD *thd)
 
 int read_statistics_for_tables_if_needed(THD *thd, TABLE_LIST *tables);
 int collect_statistics_for_table(THD *thd, TABLE *table);
-int collect_statistics_fast_for_table(THD *thd, TABLE *table);
+int collect_fast_statistics_for_table(THD *thd, TABLE *table);
 int alloc_statistics_for_table_share(THD* thd, TABLE_SHARE *share,
                                      bool is_safe);
 int alloc_statistics_for_table(THD *thd, TABLE *table);
@@ -121,23 +123,122 @@ private:
   uint8 size; /* Size of values array, in bytes */
   uchar *values;
 
+  /* Used for calculating Width Balanced Histograms */
+  /* Stores the number of elements of each bin prior to being stored
+     in 'values' */
+  ulonglong* bins;      
+  /* How many values have been sampled */
+  ulonglong no_samples;
+
+  /*
+    The accuracy of a stored value. Single Precision has the accuracy of 255
+    and Double Precision has the accuracy of 65535.
+  */
   uint prec_factor()
   {
     switch (type) {
     case SINGLE_PREC_HB:
+    case SINGLE_PREC_WB:
       return ((uint) (1 << 8) - 1);
     case DOUBLE_PREC_HB:
+    case DOUBLE_PREC_WB:
       return ((uint) (1 << 16) - 1);
     }
     return 1;
   }
 
 public:
+
+  /* Alocate memory for 'bins', which stores how many numbers fall between
+  a certain interval */
+  void malloc_bins()
+  {
+    bins = (ulonglong*) malloc(sizeof(ulonglong) * (size + 1));
+    memset(bins, 0x00, sizeof(ulonglong) * (size + 1));
+  }
+
+  void malloc_values()
+  {
+    values = (uchar*) malloc(sizeof(uchar) * size);
+  }
+
+  void set_no_samples(ulonglong val)
+  {
+    no_samples = val;
+  }
+
+  /* Free memory for 'bins' */
+  void free_bins()
+  {
+    free(bins);
+  }
+
+
+   /* 
+     How to find the appropriate bin for a value
+     ki - bin boundaries
+     min <= ki < max, where i=0,n
+     interv = (max - min) / nr_of_bins
+
+     k0     <= bin 1     < k1
+     k1     <= bin 2     < k2
+     ...
+     kn     <= bin n     < k(n+1)
+
+     k0,  k1,  k2 ...  kn,  k(n+1)
+     k0     = min             = min + interv * 0
+     k1     = k0 + interv     = min + interv * 1
+     k2     = k1 + interv     = min + interv * 2
+     ...
+     kn     = k(n-1) + interv = min + interv * n
+     k(n+1) = max
+
+     min,  min + interv,  min + interv * 2, , ,  min + interv * n | -min
+     0,  interv,  interv * 2 ...  interv * n | /interv
+     0,  1,  2, , ,  n
+     (val - min) / interv is 0 if it belongs to the 1st bin
+                          is 1 if it belongs to the 2nd bin
+                          is 2 if it belongs to the 3nd bin
+                          ...
+                          is n if it belongs to the (n+1)th bin
+  */
+  void put_value_in_bin(
+    ulonglong val,    /* value of the current field */
+    ulonglong maxval, /* maximum value */
+    ulonglong minval) /* minimum value */
+  {
+    if (val > maxval || val < minval)
+    {
+      return;
+    }
+    ulonglong bin_no;
+    if (val == maxval)
+    {
+      bin_no = size;
+    } else {
+      
+      bin_no = ((ulonglong)(val - minval) * (ulonglong) (size + 1)) /
+               (ulonglong)(maxval - minval);
+    }
+    bins[bin_no] ++;
+    no_samples ++;
+  }
+
+  void store_wb() {
+    ulonglong stored_value = 0;
+    for (uint8 bin_no = 0; bin_no < size; bin_no++) {
+      stored_value += bins[bin_no];
+      set_value(bin_no, (double)stored_value / no_samples); 
+    }
+  }
+
   uint get_width()
   {
     switch (type) {
+    case SINGLE_PREC_WB:
     case SINGLE_PREC_HB:
       return size;
+    case DOUBLE_PREC_WB:
     case DOUBLE_PREC_HB:
       return size / 2;
     }
@@ -150,8 +251,10 @@ private:
     DBUG_ASSERT(i < get_width());
     switch (type) {
     case SINGLE_PREC_HB:
+    case SINGLE_PREC_WB:
       return (uint) (((uint8 *) values)[i]);
     case DOUBLE_PREC_HB:
+    case DOUBLE_PREC_WB:
       return (uint) uint2korr(values + i * 2);
     }
     return 0;
@@ -212,12 +315,17 @@ public:
 
   bool is_available() { return get_size() > 0 && get_values(); }
 
+  /*
+    Sets histogram value of position 'i' acording to 'val' and the
+    'precision_factor()', */
   void set_value(uint i, double val)
   {
     switch (type) {
+    case SINGLE_PREC_WB:   
     case SINGLE_PREC_HB:   
       ((uint8 *) values)[i]= (uint8) (val * prec_factor());
       return;
+    case DOUBLE_PREC_WB:
     case DOUBLE_PREC_HB:
       int2store(values + i * 2, val * prec_factor());
       return;
@@ -227,8 +335,12 @@ public:
   void set_prev_value(uint i)
   {
     switch (type) {
+    case SINGLE_PREC_WB:   
+      return;
     case SINGLE_PREC_HB:   
       ((uint8 *) values)[i]= ((uint8 *) values)[i-1];
+      return;
+    case DOUBLE_PREC_WB:
       return;
     case DOUBLE_PREC_HB:
       int2store(values + i * 2, uint2korr(values + i * 2 - 2));

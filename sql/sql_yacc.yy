@@ -8601,8 +8601,6 @@ analyze:
               MYSQL_YYABORT;
           }
 
-          /* facut de moi */
-
         | ANALYZE_SYM FAST_SYM TABLE_SYM table_name opt_number_of_rows
           opt_sampling_percentage opt_duration
           PERSISTENT_SYM FOR_SYM COLUMNS
