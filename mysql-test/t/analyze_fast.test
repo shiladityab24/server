@@ -26,14 +26,18 @@ INSERT INTO Table1 VALUES
 
 SELECT * FROM Table1;
 
-set histogram_size=3;
 
+set histogram_size=5;
+set histogram_type='SINGLE_PREC_HB';
 ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (PetAge, NumberOfPuppies);
+select *, hex(histogram), decode_histogram(hist_type, histogram)
+from mysql.column_stats where table_name='Table1';
 
-select * from mysql.column_stats where table_name='Table1';
-
-select min_value, max_value, hist_type, hex(histogram), decode_histogram(hist_type, histogram)
-from mysql.column_stats where table_name='Table1' and column_name='PetAge';
+set histogram_size=10;
+set histogram_type='DOUBLE_PREC_HB';
+ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (PetAge, NumberOfPuppies);
+select *, hex(histogram), decode_histogram(hist_type, histogram)
+from mysql.column_stats where table_name='Table1';
 
 --error ER_POSITIVE_NUMBER
 ANALYZE FAST TABLE Table1 WITH 0 ROWS PERSISTENT FOR COLUMNS (LastName);

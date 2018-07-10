@@ -29,8 +29,6 @@ enum enum_histogram_type
 {
   SINGLE_PREC_HB, // single precision height-balanced (equal-height)
   DOUBLE_PREC_HB, // double precision height-balanced (equal-height)
-  SINGLE_PREC_WB, // single precision width-balanced (equal-width)
-  DOUBLE_PREC_WB, // double precision width-balanced (equal-width)
 } Histogram_type;
 
 enum enum_stat_tables
@@ -136,10 +134,8 @@ private:
   {
     switch (type) {
     case SINGLE_PREC_HB:
-    case SINGLE_PREC_WB:
       return ((uint) (1 << 8) - 1);
     case DOUBLE_PREC_HB:
-    case DOUBLE_PREC_WB:
       return ((uint) (1 << 16) - 1);
     }
     return 1;
@@ -151,8 +147,8 @@ public:
   a certain interval */
   void malloc_bins()
   {
-    bins = (ulonglong*) malloc(sizeof(ulonglong) * (size + 1));
-    memset(bins, 0x00, sizeof(ulonglong) * (size + 1));
+    bins = (ulonglong*) malloc(sizeof(ulonglong) * (get_width() + 1));
+    memset(bins, 0x00, sizeof(ulonglong) * (get_width() + 1));
   }
 
   void malloc_values()
@@ -191,7 +187,7 @@ public:
      0,  1,  2, , ,  n
      (val - min) / interv is 0 if it belongs to the 1st bin
                           is 1 if it belongs to the 2nd bin
-                          is 2 if it belongs to the 3nd bin
+                          is 2 if it belongs to the 3rd bin
                           ...
                           is n if it belongs to the (n+1)th bin
   */
@@ -204,13 +200,12 @@ public:
     {
       return;
     }
-    ulonglong bin_no;
+    ulonglong bin_no; /* the bin in which the value will be placed */
     if (val == maxval)
     {
-      bin_no = size;
+      bin_no = get_width();
     } else {
-      
-      bin_no = ((ulonglong)(val - minval) * (ulonglong) (size + 1)) /
+      bin_no = ((ulonglong)(val - minval) * (ulonglong) (get_width() + 1)) /
                (ulonglong)(maxval - minval);
     }
     bins[bin_no] ++;
@@ -218,7 +213,7 @@ public:
 
   void store_wb(ha_rows no_samples) {
     ulonglong stored_value = 0;
-    for (uint8 bin_no = 0; bin_no < size; bin_no++) {
+    for (uint8 bin_no = 0; bin_no < get_width(); bin_no++) {
       stored_value += bins[bin_no];
       set_value(bin_no, (double)stored_value / no_samples); 
     }
@@ -227,10 +222,8 @@ public:
   uint get_width()
   {
     switch (type) {
-    case SINGLE_PREC_WB:
     case SINGLE_PREC_HB:
       return size;
-    case DOUBLE_PREC_WB:
     case DOUBLE_PREC_HB:
       return size / 2;
     }
@@ -243,10 +236,8 @@ private:
     DBUG_ASSERT(i < get_width());
     switch (type) {
     case SINGLE_PREC_HB:
-    case SINGLE_PREC_WB:
       return (uint) (((uint8 *) values)[i]);
     case DOUBLE_PREC_HB:
-    case DOUBLE_PREC_WB:
       return (uint) uint2korr(values + i * 2);
     }
     return 0;
@@ -313,11 +304,9 @@ public:
   void set_value(uint i, double val)
   {
     switch (type) {
-    case SINGLE_PREC_WB:   
     case SINGLE_PREC_HB:   
       ((uint8 *) values)[i]= (uint8) (val * prec_factor());
       return;
-    case DOUBLE_PREC_WB:
     case DOUBLE_PREC_HB:
       int2store(values + i * 2, val * prec_factor());
       return;
@@ -327,12 +316,8 @@ public:
   void set_prev_value(uint i)
   {
     switch (type) {
-    case SINGLE_PREC_WB:   
-      return;
     case SINGLE_PREC_HB:   
       ((uint8 *) values)[i]= ((uint8 *) values)[i-1];
-      return;
-    case DOUBLE_PREC_WB:
       return;
     case DOUBLE_PREC_HB:
       int2store(values + i * 2, uint2korr(values + i * 2 - 2));
