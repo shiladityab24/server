@@ -333,7 +333,7 @@ public:
   inline void init_wb(THD *thd, Field * table_field);
   inline bool add_wb(ha_rows rowno);
   inline bool put_value_in_bin(); 
-  inline void finish_wb(); 
+  inline void finish_wb(ha_rows rows); 
 };
 
 
@@ -2492,7 +2492,6 @@ void Column_statistics_collected::init_wb(THD *thd, Field *table_field)
   column_total_length= 0;
   count_distinct= NULL;
   histogram.malloc_bins();
-  histogram.set_no_samples(0);
 }
 
 
@@ -2563,10 +2562,15 @@ bool Column_statistics_collected::add_wb(ha_rows rowno)
 inline
 bool Column_statistics_collected::put_value_in_bin()
 {
-  ulonglong val = column->val_uint();
-  ulonglong maxval = max_value->val_uint();
-  ulonglong minval = min_value->val_uint();
-  histogram.put_value_in_bin(val, maxval, minval); 
+  if (column->is_null())
+    ;
+  else
+  {
+    ulonglong val = column->val_uint();
+    ulonglong maxval = max_value->val_uint();
+    ulonglong minval = min_value->val_uint();
+    histogram.put_value_in_bin(val, maxval, minval); 
+  }
   return 0;
 }
 
@@ -2635,11 +2639,29 @@ void Column_statistics_collected::finish(ha_rows rows)
 }
 
 inline
-void Column_statistics_collected::finish_wb()
+void Column_statistics_collected::finish_wb(ha_rows rows)
 {
-   histogram.malloc_values();
-   histogram.store_wb();
-   histogram.free_bins();
+  double val;
+  /* Sets the percentage of nulls in the column */
+  if (rows)
+  {
+     val= (double) nulls / rows;
+     set_nulls_ratio(val);
+     set_not_null(COLUMN_STAT_NULLS_RATIO);
+  }
+  /* Sets the average length of a column value */
+  if (rows - nulls)
+  {
+     val= (double) column_total_length / (rows - nulls);
+     set_avg_length(val);
+     set_not_null(COLUMN_STAT_AVG_LENGTH);
+  }
+  histogram.malloc_values();
+  histogram.store_wb(rows);
+  histogram.free_bins();
+  set_not_null(COLUMN_STAT_HIST_SIZE);
+  set_not_null(COLUMN_STAT_HIST_TYPE);
+  set_not_null(COLUMN_STAT_HISTOGRAM);
 }
 
 
@@ -2855,7 +2877,7 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
     table_field= *field_ptr;
     if (!bitmap_is_set(table->read_set, table_field->field_index))
       continue;
-    table_field->collected_stats->finish_wb();
+    table_field->collected_stats->finish_wb(rows);
   }
   bitmap_clear_all(table->write_set);
   DBUG_RETURN(rc);          

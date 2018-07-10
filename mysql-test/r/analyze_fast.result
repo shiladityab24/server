@@ -1,0 +1,58 @@
+#
+# Test for ANALYZE FAST ... PERSISTENT FOR COLUMNS (...) 
+#
+DROP TABLE IF EXISTS Table1;
+Warnings:
+Note	1051	Unknown table 'test.Table1'
+CREATE TABLE Table1 (
+PetName varchar(20),
+LastName varchar(20),
+FirstName varchar(20),
+PetAge int unsigned, 
+NumberOfPuppies int unsigned
+);
+INSERT INTO Table1 VALUES
+("Flufy",   "Yates",     "Maria",   4, 12),
+("Buttons", "David",     "Jones",   5, 10),
+("Paws",    "Johanson",  "Samuel",  9, 20),
+("Gina",    "Marry",     "Carl",    4 ,51),
+("Rusa",    "June",      "Rick",    2 ,23),
+("Alpha",   "July",      "Marty",   3 ,23),
+("Bravo",   "August",    "Michael", 6 ,24),
+("Charlie", "September", "John",    5 ,52),
+("Delta",   "October",   "Sam",     6 ,62),
+("Hector",  "November",  "Andrew",  5 ,12);
+SELECT * FROM Table1;
+PetName	LastName	FirstName	PetAge	NumberOfPuppies
+Flufy	Yates	Maria	4	12
+Buttons	David	Jones	5	10
+Paws	Johanson	Samuel	9	20
+Gina	Marry	Carl	4	51
+Rusa	June	Rick	2	23
+Alpha	July	Marty	3	23
+Bravo	August	Michael	6	24
+Charlie	September	John	5	52
+Delta	October	Sam	6	62
+Hector	November	Andrew	5	12
+set histogram_size=3;
+ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (PetAge, NumberOfPuppies);
+Table	Op	Msg_type	Msg_text
+test.Table1	analyze_fast	status	Engine-independent statistics collected
+test.Table1	analyze_fast	status	OK
+select * from mysql.column_stats where table_name='Table1';
+db_name	table_name	column_name	min_value	max_value	nulls_ratio	avg_length	avg_frequency	hist_size	hist_type	histogram
+test	Table1	PetAge	2	9	0.0000	4.0000	NULL	3	SINGLE_PREC_HB	3²å
+test	Table1	NumberOfPuppies	10	62	0.0000	4.0000	NULL	3	SINGLE_PREC_HB	f²²
+select min_value, max_value, hist_type, hex(histogram), decode_histogram(hist_type, histogram)
+from mysql.column_stats where table_name='Table1' and column_name='PetAge';
+min_value	max_value	hist_type	hex(histogram)	decode_histogram(hist_type, histogram)
+2	9	SINGLE_PREC_HB	33B2E5	0.200,0.498,0.200,0.102
+ANALYZE FAST TABLE Table1 WITH 0 ROWS PERSISTENT FOR COLUMNS (LastName);
+ERROR HY000: WITH ... ROWS must have a positive number
+ANALYZE FAST TABLE Table1 SAMPLING 0 PERCENT PERSISTENT FOR COLUMNS (LastName);
+ERROR HY000: SAMPLING ... PERCENT must have a positive number
+ANALYZE FAST TABLE Table1 LASTS 0 SECONDS PERSISTENT FOR COLUMNS (LastName);
+ERROR HY000: LASTS ... SECONDS must have a positive number
+ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (LastName IN RANGE 0);
+ERROR HY000: IN RANGE ... must have a positive number
+DROP TABLE Table1;

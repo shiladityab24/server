@@ -127,8 +127,6 @@ private:
   /* Stores the number of elements of each bin prior to being stored
      in 'values' */
   ulonglong* bins;      
-  /* How many values have been sampled */
-  ulonglong no_samples;
 
   /*
     The accuracy of a stored value. Single Precision has the accuracy of 255
@@ -160,11 +158,6 @@ public:
   void malloc_values()
   {
     values = (uchar*) malloc(sizeof(uchar) * size);
-  }
-
-  void set_no_samples(ulonglong val)
-  {
-    no_samples = val;
   }
 
   /* Free memory for 'bins' */
@@ -221,10 +214,9 @@ public:
                (ulonglong)(maxval - minval);
     }
     bins[bin_no] ++;
-    no_samples ++;
   }
 
-  void store_wb() {
+  void store_wb(ha_rows no_samples) {
     ulonglong stored_value = 0;
     for (uint8 bin_no = 0; bin_no < size; bin_no++) {
       stored_value += bins[bin_no];
