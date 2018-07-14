@@ -331,7 +331,7 @@ public:
   inline void cleanup();
   /* Functions used for building the Width Balanced Histogram */
   inline void init_wb(THD *thd, Field * table_field);
-  inline bool add_wb(ha_rows rowno);
+  inline bool add_wb();
   inline bool put_value_in_bin(); 
   inline void finish_wb(ha_rows rows); 
 };
@@ -2530,7 +2530,7 @@ bool Column_statistics_collected::add(ha_rows rowno)
 }
 
 inline
-bool Column_statistics_collected::add_wb(ha_rows rowno)
+bool Column_statistics_collected::add_wb()
 {
   bool err= 0;
   if (column->is_null())
@@ -2541,10 +2541,12 @@ bool Column_statistics_collected::add_wb(ha_rows rowno)
        column value */
     column_total_length+= column->value_length();
     /* Updates the minimum value of the column */
-    if (min_value && column->update_min(min_value, rowno == nulls))
+    if (min_value && column->update_min(min_value,
+        is_null(COLUMN_STAT_MIN_VALUE)))
       set_not_null(COLUMN_STAT_MIN_VALUE);
     /* Updates the maximum value of the column */
-    if (max_value && column->update_max(max_value, rowno == nulls))
+    if (max_value && column->update_max(max_value,
+        is_null(COLUMN_STAT_MAX_VALUE)))
       set_not_null(COLUMN_STAT_MAX_VALUE);
   } 
   return err;
@@ -2778,13 +2780,13 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
   int rc;
   Field **field_ptr;
   Field *table_field;
-  ha_rows rows= 0;
   handler *file=table->file;
 
   DBUG_ENTER("collect_fast_statistics_for_table");
 
-  table->collected_stats->cardinality_is_null= TRUE;
-  table->collected_stats->cardinality= 0;
+  int no_samples = file->records();
+  table->collected_stats->cardinality_is_null = TRUE;
+  table->collected_stats->cardinality = no_samples;
 
   /* Initialize the fields that collect statistics */
   for (field_ptr= table->field; *field_ptr; field_ptr++)
@@ -2807,7 +2809,7 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
   {  
     DEBUG_SYNC(table->in_use, "min_and_max_collection");
 
-    while ((rc= file->ha_rnd_next(table->record[0])) != HA_ERR_END_OF_FILE)
+    while ((rc= file->ha_rnd_next(table->record[1])) != HA_ERR_END_OF_FILE)
     {
       if (thd->killed)
         break;
@@ -2824,21 +2826,13 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
         table_field= *field_ptr;
         if (!bitmap_is_set(table->read_set, table_field->field_index))
           continue;  
-        if ((rc= table_field->collected_stats->add_wb(rows)))
+        if ((rc= table_field->collected_stats->add_wb()))
           break;
       }
       if (rc)
         break;
-      rows++;
     }
     file->ha_rnd_end();
-  }
-  rc= (rc == HA_ERR_END_OF_FILE && !thd->killed) ? 0 : 1;
-
-  if (!rc)
-  {
-    table->collected_stats->cardinality_is_null= FALSE;
-    table->collected_stats->cardinality= rows;
   }
 
   /* Starts placing each table value in buckets */
@@ -2871,15 +2865,16 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
     }
     file->ha_rnd_end();
   }
-  rc= (rc == HA_ERR_END_OF_FILE && !thd->killed) ? 0 : 1;
+
   for (field_ptr= table->field; *field_ptr; field_ptr++)
   {
     table_field= *field_ptr;
     if (!bitmap_is_set(table->read_set, table_field->field_index))
       continue;
-    table_field->collected_stats->finish_wb(rows);
+    table_field->collected_stats->finish_wb(no_samples);
   }
   bitmap_clear_all(table->write_set);
+
   DBUG_RETURN(rc);          
 }
 
