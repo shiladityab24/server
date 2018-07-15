@@ -2825,7 +2825,7 @@ class Sampling {
 
   ulonglong get_no_samples()
   {
-    return no_records * 100 / sampling_percentage;
+    return no_records * sampling_percentage / 100;
   }
 
   /* 
