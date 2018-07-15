@@ -700,6 +700,7 @@ void LEX::start(THD *thd_arg)
   view_list.empty();
   with_column_list.empty();
   with_persistent_for_clause= FALSE;
+  sampling_percentage= 100;
   column_list= NULL;
   index_list= NULL;
   prepared_stmt_params.empty();
