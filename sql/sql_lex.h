@@ -3114,6 +3114,7 @@ public:
     bool with_admin_option;                     // GRANT role
     bool with_persistent_for_clause; // uses PERSISTENT FOR clause (in ANALYZE)
   };
+  ulonglong sampling_percentage;
   enum enum_var_type option_type;
   enum enum_drop_mode drop_mode;
 

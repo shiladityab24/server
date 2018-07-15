@@ -8860,6 +8860,7 @@ analyze:
             if (lex->column_list == NULL)
               MYSQL_YYABORT;
             thd->lex->with_persistent_for_clause= TRUE;
+            thd->lex->sampling_percentage= $6;
             // !!TEMPORARY!!
             // For the moment it is executing the ANALYZE TABLE code.
             // If 'with_persistent_for_clause' is not true, it will select
@@ -8889,7 +8890,7 @@ opt_number_of_rows:
         ;
 
 opt_sampling_percentage:
-          /* empty */    { $$ = 0; }
+          /* empty */    { $$ = 100; }
         | SAMPLING ulonglong_num PERCENT
           { 
             if ($2 == 0)
