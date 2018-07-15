@@ -2925,7 +2925,8 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
   Field **field_ptr;
   Field *table_field;
   handler *file=table->file;
-  Sampling sampling = Sampling(100, 0, file->records());
+  ulonglong sampling_percentage = thd->lex->sampling_percentage;
+  Sampling sampling = Sampling(sampling_percentage, 0, file->records());
 
   DBUG_ENTER("collect_fast_statistics_for_table");
 
