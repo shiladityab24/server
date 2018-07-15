@@ -2813,7 +2813,7 @@ class Sampling {
     hundred_multiplier = 0;
   }
   
-  ulonglong get_current_position()
+  ulonglong get_current_pos()
   {
     return current_pos;
   }
@@ -2857,7 +2857,7 @@ class Sampling {
     The process of sampling continues unitl the end of the table.
     Time complexity: O( #sampling_percentage * #no_records / 100 )
   */
-  void next()
+  int next(TABLE *table)
   {
     percentile_pos ++;
     if (percentile_pos >= sampling_percentage)
@@ -2865,8 +2865,23 @@ class Sampling {
       percentile_pos = 0;
       hundred_multiplier ++;
     }
+    ulonglong last_pos = current_pos;
     current_pos = start_pos + (percentile_pos * 100) / sampling_percentage
                 + hundred_multiplier * 100;
+    if (end() == true)
+    {
+      return HA_ERR_END_OF_FILE;
+    }
+    int rc;
+    for (ulonglong i=last_pos; i<current_pos; i++)
+    {
+      if ((rc = table->file->ha_rnd_next(table->record[0])) 
+          == HA_ERR_END_OF_FILE)
+      {
+        return HA_ERR_END_OF_FILE;
+      }
+    }
+    return rc;
   }
 
   /*
@@ -2879,11 +2894,17 @@ class Sampling {
     return true;
   }
 
-  void reset()
+  int init(TABLE *table)
   {
     current_pos = 0;
     percentile_pos = 0;
     hundred_multiplier = 0;
+    int rc;
+    if ((rc = table->file->ha_rnd_init(TRUE)))
+    {
+      return rc;
+    }
+    return table->file->ha_rnd_next(table->record[0]);
   }
 };
 
@@ -2928,11 +2949,11 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
     the minimum column value, the maximum column value and the distinct values
     from each field
   */
-  if (!(rc= file->ha_rnd_init(TRUE)))
+  if (!(rc= sampling.init(table)))
   {  
     DEBUG_SYNC(table->in_use, "min_and_max_collection");
 
-    while ((rc= file->ha_rnd_next(table->record[0])) != HA_ERR_END_OF_FILE)
+    do
     {
       if (thd->killed)
         break;
@@ -2955,16 +2976,19 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
       if (rc)
         break;
     }
-    file->ha_rnd_end();
+    while ((rc = sampling.next(table)) != HA_ERR_END_OF_FILE);
+
+    table->file->ha_rnd_end();
   }
+
   rc= (rc == HA_ERR_END_OF_FILE && !thd->killed) ? 0 : 1;
 
   /* Starts placing each table value in buckets */
-  if (!(rc= file->ha_rnd_init(TRUE)))
+  if (!(rc= sampling.init(table)))
   {  
     DEBUG_SYNC(table->in_use, "fast_statistics_collection_start");
 
-    while ((rc= file->ha_rnd_next(table->record[0])) != HA_ERR_END_OF_FILE)
+    do
     {
       if (thd->killed)
         break;
@@ -2987,8 +3011,11 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
       if (rc)
         break;
     }
-    file->ha_rnd_end();
+    while ((rc = sampling.next(table)) != HA_ERR_END_OF_FILE);
+
+    table->file->ha_rnd_end();
   }
+
   rc= (rc == HA_ERR_END_OF_FILE && !thd->killed) ? 0 : 1;
 
   for (field_ptr= table->field; *field_ptr; field_ptr++)
@@ -2998,8 +3025,8 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
       continue;
     table_field->collected_stats->finish_wb(sampling.get_no_samples());
   }
-  bitmap_clear_all(table->write_set);
 
+  bitmap_clear_all(table->write_set);
   DBUG_RETURN(rc);          
 }
 
