@@ -1,0 +1,361 @@
+#
+# Test for ANALYZE FAST ... PERSISTENT FOR COLUMNS (...) 
+#
+DROP TABLE IF EXISTS Table1;
+Warnings:
+Note	1051	Unknown table 'test.Table1'
+#
+CREATE TABLE Table1 (
+`LastName` VARCHAR(20),
+`ID` INT UNSIGNED NOT NULL AUTO_INCREMENT, 
+`FirstName` VARCHAR(20),
+`PetAge` INT UNSIGNED, 
+`PetName` VARCHAR(20),
+`NumberOfPuppies` INT UNSIGNED,
+PRIMARY KEY (`ID`),
+UNIQUE KEY (`PetName`)
+) Engine=InnoDB;
+#
+# Table values
+INSERT INTO Table1 (PetName, LastName, FirstName, PetAge, NumberOfPuppies) VALUES
+("Phrom", "Uttlyea", "Chshkouts", 248, 169),
+("Gationatia", "Gatess", "Camo", 118, 224),
+("Isfincelicur", "Sinchacoperspi", "Usementschaini", 124, 47),
+("Aningsss", "Puriever", "Essentradped", 165, 172),
+("Acro", "Prograte", "Uggl", 37, 87),
+("Banicrushwi", "Arubionfudel", "Raneduslyt", 187, 128),
+("Acri", "Rtinse", "Ngyster", 21, 12),
+("Ariestastuarna", "Libill", "Vestenmatio", 185, 238),
+("Pindomestarcudin", "Apeliapedscaser", "Borge", 69, 139),
+("Imentivapp", "Untionangranagel", "Exallutssnolour", 243, 29),
+("Surintardeachfor", "Acherentante", "Endeningsss", 155, 181),
+("Alicristansil", "Tertspoosit", "Ccellonsupss", 194, 199),
+("Nompassi", "Suliessibblere", "Adectrawson", 44, 25),
+("Deje", "Relyes", "Rochardsterwapp", 183, 35),
+("Argla", "Tatroudierumi", "Nuouch", 247, 178),
+("Tancestasti", "Ncencheekined", "Ershotchm", 61, 35),
+("Udgm", "Osepangern", "Whooperept", 212, 199),
+("Hortbe", "Istswetallessse", "Ionasseborenemo", 234, 183),
+("Tiontssaurai", "Aracollusssitta", "Adightchecons", 19, 73),
+("Itslyw", "Lachlegrassers", "Ersepi", 72, 10),
+("Ightseenializzes", "Stlyeryclestr", "Onmetinginesqu", 101, 30),
+("Helissi", "Parssignoming", "Oxygre", 202, 65),
+("Nixswedesssynsid", "Sphorotsalesess", "Opershingsber", 46, 68),
+("Ouserse", "Miew", "Himings", 65, 178),
+("Gersous", "Rstrumbstaing", "Tfor", 195, 100),
+("Hibb", "Stson", "Nesionshb", 247, 49),
+("Cotidendian", "Uttlesinsitl", "Rysock", 200, 77),
+("Oppalog", "Stlyraddlogoutle", "Cyster", 2, 96),
+("Ionsmartsur", "Allyheake", "Rbanutsbystopy", 36, 226),
+("Ingentsphousdi", "Custo", "Ineskysseniskint", 128, 205),
+("Rcifyinelido", "Thernectines", "Cede", 85, 233),
+("Altieckbrat", "Lestinesonsenti", "Rersiesytesitte", 168, 42),
+("Approbbiter", "Tivallyfulai", "Asoaleb", 247, 199),
+("Laysfa", "Ngletsaventi", "Ityspilians", 59, 229),
+("Antin", "Enstederest", "Calopsysl", 216, 81),
+("Ussicallaticiset", "Dvittlieststio", "Oushmeddli", 200, 228),
+("Ings", "Rrannessbusas", "Edescifing", 199, 16),
+("Reconatss", "Ringsti", "Rmerlena", 32, 232),
+("Pesicsslonglysor", "Essssolly", "Oblepc", 140, 193),
+("Erso", "Lbelorkingsk", "Abledstain", 86, 10),
+("Larristsupl", "Cheatestree", "Coastria", 191, 42),
+("Erondumar", "Odst", "Plastabrimpli", 60, 224),
+("Lertspedian", "Tateragen", "Terapratechneri", 84, 19),
+("Gestrummeaverdsu", "Sell", "Hyperintly", 213, 244),
+("Easterelma", "Bstsmitie", "Icssestoog", 205, 24),
+("Mplermor", "Ivergessie", "Eupughtings", 131, 173),
+("Ecomplasiencroc", "Ersikscomsdol", "Neshrobbiltest", 100, 61),
+("Tion", "Rmaraf", "Rricarshr", 217, 138),
+("Nednessenthedbr", "Achail", "Ypturts", 21, 249),
+("Erituruestr", "Nichsousloque", "Bumalcke", 104, 201),
+("Ankleanuhnhays", "Odigglaccl", "Izessol", 76, 32),
+("Abalvelimpensey", "Ootallsonat", "Idect", 95, 77),
+("Ownestrows", "Ashadobbehe", "Negglumqin", 26, 98),
+("Binge", "King", "Estortock", 61, 168),
+("Heourch", "Dimutork", "Guatcher", 67, 171),
+("Disy", "Herstarperme", "Ysto", 75, 103),
+("Supharizersi", "Fulnukkax", "Onsebow", 252, 78),
+("Arbasseers", "Antsubbirtseodge", "Hebagp", 39, 155),
+("Eiggiv", "Caticancizerthe", "Ujawnin", 38, 159),
+("Bullic", "Prainagr", "Gicksmenst", 81, 119),
+("Trons", "Itysm", "Postsystsm", 232, 250),
+("Tedfas", "Iestslyces", "Iddlictsynxedi", 193, 181),
+("Oucternessori", "Latskysepstena", "Inst", 99, 37),
+("Orserscadsto", "Xcingthordeentin", "Baconferi", 185, 189),
+("Rgsssic", "Uffeets", "Ffindulabbe", 143, 151),
+("Orterinsi", "Rmingarlestriack", "Epuslots", 127, 31),
+("Erva", "Pectingst", "Hationemellstra", 247, 180),
+("Arderv", "Rksoplediedic", "Natesseka", 82, 237),
+("Cred", "Sizedillarria", "Ller", 77, 2),
+("Oessenzoncessism", "Cuthenchagen", "Ndlibratioxygu", 116, 213),
+("Ensterbi", "Rimalkes", "Cingstrumbl", 199, 25),
+("Ionshester", "Ltusso", "Lism", 238, 49),
+("Iftiongabili", "Rkerat", "Inglutive", 183, 150),
+("Chstancessautcri", "Oseb", "Ierrysmugeasple", 64, 76),
+("Ubtsss", "Ppicanselisim", "Mprastedyin", 121, 121),
+("Liversingsoracu", "Olinsteartsords", "Aiiastantsking", 108, 209),
+("Emells", "Herditysi", "Byinnorthrubel", 28, 231),
+("Bilesta", "Gloystagosthg", "Ntsmstor", 129, 213),
+("Ionnindstabb", "Olionsio", "Proatiouisquilee", 120, 67),
+("Synxsw", "Istiondlersium", "Ensonerslodstan", 19, 26),
+("Uentskaryst", "Menur", "Womboascuive", 175, 118),
+("Ablec", "Plibriggerst", "Temblinquityss", 232, 111),
+("Inoestarks", "Ethgolishiricles", "Sione", 11, 33),
+("Mbuckligst", "Neespestiossn", "Ersesssadvanat", 65, 244),
+("Nablygrelcale", "Batiogellamoco", "Inseekediantessi", 143, 156),
+("Depscr", "Sionsimbrat", "Dismalsky", 13, 4),
+("Ckscoluir", "Valdicianzeso", "Taig", 183, 149),
+("Niandsesi", "Cancloomper", "Tern", 223, 212),
+("Tonercesssan", "Aigroarmaliv", "Rylle", 10, 97),
+("Aterseethimp", "Iessedw", "Izedivensontemor", 204, 137),
+("Eloteri", "Lansastonstinta", "Klesoatersiv", 21, 119),
+("Ometlessnest", "Msiersher", "Riblortis", 206, 58),
+("Luen", "Matorebiahelmo", "Ackshasts", 82, 36),
+("Ggingertivandist", "Tensassistablerl", "Arkerict", 151, 15),
+("Shanash", "Lauhansp", "Dever", 207, 189),
+("Serysiantrysonst", "Eassestlefumis", "Itufflizederse", 181, 141),
+("Oactomptindsolar", "Ctiman", "Jochaliffl", 99, 135),
+("Earainghtion", "Sslarluitalimol", "Itionaties", 107, 79),
+("Timmorinerea", "Smspitender", "Istsm", 94, 67),
+("Elifigiencesoci", "Nnysimsedsollead", "Barsi", 33, 158);
+SELECT * FROM Table1;
+LastName	ID	FirstName	PetAge	PetName	NumberOfPuppies
+Uttlyea	1	Chshkouts	248	Phrom	169
+Gatess	2	Camo	118	Gationatia	224
+Sinchacoperspi	3	Usementschaini	124	Isfincelicur	47
+Puriever	4	Essentradped	165	Aningsss	172
+Prograte	5	Uggl	37	Acro	87
+Arubionfudel	6	Raneduslyt	187	Banicrushwi	128
+Rtinse	7	Ngyster	21	Acri	12
+Libill	8	Vestenmatio	185	Ariestastuarna	238
+Apeliapedscaser	9	Borge	69	Pindomestarcudin	139
+Untionangranagel	10	Exallutssnolour	243	Imentivapp	29
+Acherentante	11	Endeningsss	155	Surintardeachfor	181
+Tertspoosit	12	Ccellonsupss	194	Alicristansil	199
+Suliessibblere	13	Adectrawson	44	Nompassi	25
+Relyes	14	Rochardsterwapp	183	Deje	35
+Tatroudierumi	15	Nuouch	247	Argla	178
+Ncencheekined	16	Ershotchm	61	Tancestasti	35
+Osepangern	17	Whooperept	212	Udgm	199
+Istswetallessse	18	Ionasseborenemo	234	Hortbe	183
+Aracollusssitta	19	Adightchecons	19	Tiontssaurai	73
+Lachlegrassers	20	Ersepi	72	Itslyw	10
+Stlyeryclestr	21	Onmetinginesqu	101	Ightseenializzes	30
+Parssignoming	22	Oxygre	202	Helissi	65
+Sphorotsalesess	23	Opershingsber	46	Nixswedesssynsid	68
+Miew	24	Himings	65	Ouserse	178
+Rstrumbstaing	25	Tfor	195	Gersous	100
+Stson	26	Nesionshb	247	Hibb	49
+Uttlesinsitl	27	Rysock	200	Cotidendian	77
+Stlyraddlogoutle	28	Cyster	2	Oppalog	96
+Allyheake	29	Rbanutsbystopy	36	Ionsmartsur	226
+Custo	30	Ineskysseniskint	128	Ingentsphousdi	205
+Thernectines	31	Cede	85	Rcifyinelido	233
+Lestinesonsenti	32	Rersiesytesitte	168	Altieckbrat	42
+Tivallyfulai	33	Asoaleb	247	Approbbiter	199
+Ngletsaventi	34	Ityspilians	59	Laysfa	229
+Enstederest	35	Calopsysl	216	Antin	81
+Dvittlieststio	36	Oushmeddli	200	Ussicallaticiset	228
+Rrannessbusas	37	Edescifing	199	Ings	16
+Ringsti	38	Rmerlena	32	Reconatss	232
+Essssolly	39	Oblepc	140	Pesicsslonglysor	193
+Lbelorkingsk	40	Abledstain	86	Erso	10
+Cheatestree	41	Coastria	191	Larristsupl	42
+Odst	42	Plastabrimpli	60	Erondumar	224
+Tateragen	43	Terapratechneri	84	Lertspedian	19
+Sell	44	Hyperintly	213	Gestrummeaverdsu	244
+Bstsmitie	45	Icssestoog	205	Easterelma	24
+Ivergessie	46	Eupughtings	131	Mplermor	173
+Ersikscomsdol	47	Neshrobbiltest	100	Ecomplasiencroc	61
+Rmaraf	48	Rricarshr	217	Tion	138
+Achail	49	Ypturts	21	Nednessenthedbr	249
+Nichsousloque	50	Bumalcke	104	Erituruestr	201
+Odigglaccl	51	Izessol	76	Ankleanuhnhays	32
+Ootallsonat	52	Idect	95	Abalvelimpensey	77
+Ashadobbehe	53	Negglumqin	26	Ownestrows	98
+King	54	Estortock	61	Binge	168
+Dimutork	55	Guatcher	67	Heourch	171
+Herstarperme	56	Ysto	75	Disy	103
+Fulnukkax	57	Onsebow	252	Supharizersi	78
+Antsubbirtseodge	58	Hebagp	39	Arbasseers	155
+Caticancizerthe	59	Ujawnin	38	Eiggiv	159
+Prainagr	60	Gicksmenst	81	Bullic	119
+Itysm	61	Postsystsm	232	Trons	250
+Iestslyces	62	Iddlictsynxedi	193	Tedfas	181
+Latskysepstena	63	Inst	99	Oucternessori	37
+Xcingthordeentin	64	Baconferi	185	Orserscadsto	189
+Uffeets	65	Ffindulabbe	143	Rgsssic	151
+Rmingarlestriack	66	Epuslots	127	Orterinsi	31
+Pectingst	67	Hationemellstra	247	Erva	180
+Rksoplediedic	68	Natesseka	82	Arderv	237
+Sizedillarria	69	Ller	77	Cred	2
+Cuthenchagen	70	Ndlibratioxygu	116	Oessenzoncessism	213
+Rimalkes	71	Cingstrumbl	199	Ensterbi	25
+Ltusso	72	Lism	238	Ionshester	49
+Rkerat	73	Inglutive	183	Iftiongabili	150
+Oseb	74	Ierrysmugeasple	64	Chstancessautcri	76
+Ppicanselisim	75	Mprastedyin	121	Ubtsss	121
+Olinsteartsords	76	Aiiastantsking	108	Liversingsoracu	209
+Herditysi	77	Byinnorthrubel	28	Emells	231
+Gloystagosthg	78	Ntsmstor	129	Bilesta	213
+Olionsio	79	Proatiouisquilee	120	Ionnindstabb	67
+Istiondlersium	80	Ensonerslodstan	19	Synxsw	26
+Menur	81	Womboascuive	175	Uentskaryst	118
+Plibriggerst	82	Temblinquityss	232	Ablec	111
+Ethgolishiricles	83	Sione	11	Inoestarks	33
+Neespestiossn	84	Ersesssadvanat	65	Mbuckligst	244
+Batiogellamoco	85	Inseekediantessi	143	Nablygrelcale	156
+Sionsimbrat	86	Dismalsky	13	Depscr	4
+Valdicianzeso	87	Taig	183	Ckscoluir	149
+Cancloomper	88	Tern	223	Niandsesi	212
+Aigroarmaliv	89	Rylle	10	Tonercesssan	97
+Iessedw	90	Izedivensontemor	204	Aterseethimp	137
+Lansastonstinta	91	Klesoatersiv	21	Eloteri	119
+Msiersher	92	Riblortis	206	Ometlessnest	58
+Matorebiahelmo	93	Ackshasts	82	Luen	36
+Tensassistablerl	94	Arkerict	151	Ggingertivandist	15
+Lauhansp	95	Dever	207	Shanash	189
+Eassestlefumis	96	Itufflizederse	181	Serysiantrysonst	141
+Ctiman	97	Jochaliffl	99	Oactomptindsolar	135
+Sslarluitalimol	98	Itionaties	107	Earainghtion	79
+Smspitender	99	Istsm	94	Timmorinerea	67
+Nnysimsedsollead	100	Barsi	33	Elifigiencesoci	158
+#
+# Without FLUSH, the following ANALYZE FAST command would have no idea about the number of rows from the table
+FLUSH TABLE Table1;
+#
+# Test for a Single Precision Histogram with 6 bins 
+# Single Precision means it occupies 1 byte
+# Bin 6 is obtained using bin 5
+set histogram_size=5;
+set histogram_type='SINGLE_PREC_HB';
+#
+ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (PetAge, NumberOfPuppies);
+Table	Op	Msg_type	Msg_text
+test.Table1	analyze_fast	status	Engine-independent statistics collected
+test.Table1	analyze_fast	status	OK
+select db_name, table_name, column_name, min_value, max_value, nulls_ratio, avg_length, avg_frequency, hist_size, hist_type, hex(histogram), decode_histogram(hist_type, histogram)
+from mysql.column_stats where table_name='Table1';
+db_name	table_name	column_name	min_value	max_value	nulls_ratio	avg_length	avg_frequency	hist_size	hist_type	hex(histogram)	decode_histogram(hist_type, histogram)
+test	Table1	PetAge	2	252	0.0000	4.0000	NULL	5	SINGLE_PREC_HB	2B5E84A0D6	0.169,0.200,0.149,0.110,0.212,0.161
+test	Table1	NumberOfPuppies	2	250	0.0000	4.0000	NULL	5	SINGLE_PREC_HB	3A637FA0D1	0.227,0.161,0.110,0.129,0.192,0.180
+#
+# Comparison between sampling 100% and sampling without specifying the percentage.
+# Hint Hint... It should be the same thing.
+ANALYZE FAST TABLE Table1 SAMPLING 100 PERCENT PERSISTENT FOR COLUMNS (PetAge, NumberOfPuppies);
+Table	Op	Msg_type	Msg_text
+test.Table1	analyze_fast	status	Engine-independent statistics collected
+test.Table1	analyze_fast	status	OK
+select db_name, table_name, column_name, min_value, max_value, nulls_ratio, avg_length, avg_frequency, hist_size, hist_type, hex(histogram), decode_histogram(hist_type, histogram)
+from mysql.column_stats where table_name='Table1';
+db_name	table_name	column_name	min_value	max_value	nulls_ratio	avg_length	avg_frequency	hist_size	hist_type	hex(histogram)	decode_histogram(hist_type, histogram)
+test	Table1	PetAge	2	252	0.0000	4.0000	NULL	5	SINGLE_PREC_HB	2B5E84A0D6	0.169,0.200,0.149,0.110,0.212,0.161
+test	Table1	NumberOfPuppies	2	250	0.0000	4.0000	NULL	5	SINGLE_PREC_HB	3A637FA0D1	0.227,0.161,0.110,0.129,0.192,0.180
+#
+ANALYZE FAST TABLE Table1 SAMPLING 50 PERCENT PERSISTENT FOR COLUMNS (PetAge, NumberOfPuppies);
+Table	Op	Msg_type	Msg_text
+test.Table1	analyze_fast	status	Engine-independent statistics collected
+test.Table1	analyze_fast	status	OK
+select db_name, table_name, column_name, min_value, max_value, nulls_ratio, avg_length, avg_frequency, hist_size, hist_type, hex(histogram), decode_histogram(hist_type, histogram)
+from mysql.column_stats where table_name='Table1';
+db_name	table_name	column_name	min_value	max_value	nulls_ratio	avg_length	avg_frequency	hist_size	hist_type	hex(histogram)	decode_histogram(hist_type, histogram)
+test	Table1	PetAge	10	252	0.0000	4.0000	NULL	5	SINGLE_PREC_HB	42668EA3D6	0.259,0.141,0.157,0.082,0.200,0.161
+test	Table1	NumberOfPuppies	2	250	0.0000	4.0000	NULL	5	SINGLE_PREC_HB	427093B7E5	0.259,0.180,0.137,0.141,0.180,0.102
+#
+ANALYZE FAST TABLE Table1 SAMPLING 23 PERCENT PERSISTENT FOR COLUMNS (PetAge, NumberOfPuppies);
+Table	Op	Msg_type	Msg_text
+test.Table1	analyze_fast	status	Engine-independent statistics collected
+test.Table1	analyze_fast	status	OK
+select db_name, table_name, column_name, min_value, max_value, nulls_ratio, avg_length, avg_frequency, hist_size, hist_type, hex(histogram), decode_histogram(hist_type, histogram)
+from mysql.column_stats where table_name='Table1';
+db_name	table_name	column_name	min_value	max_value	nulls_ratio	avg_length	avg_frequency	hist_size	hist_type	hex(histogram)	decode_histogram(hist_type, histogram)
+test	Table1	PetAge	11	252	0.0000	4.0000	NULL	5	SINGLE_PREC_HB	214D6E6EB1	0.129,0.173,0.129,0.000,0.263,0.306
+test	Table1	NumberOfPuppies	10	250	0.0000	4.0000	NULL	5	SINGLE_PREC_HB	2C8590C7D2	0.173,0.349,0.043,0.216,0.043,0.176
+#
+# Test for a Double Precision Histogram with 6 bins 
+# Double Precision means it occupies 2 bytes
+# Bin 6 is obtained using bin 5
+set histogram_size=10;
+set histogram_type='DOUBLE_PREC_HB';
+#
+ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (PetAge, NumberOfPuppies);
+Table	Op	Msg_type	Msg_text
+test.Table1	analyze_fast	status	Engine-independent statistics collected
+test.Table1	analyze_fast	status	OK
+select db_name, table_name, column_name, min_value, max_value, nulls_ratio, avg_length, avg_frequency, hist_size, hist_type, hex(histogram), decode_histogram(hist_type, histogram)
+from mysql.column_stats where table_name='Table1';
+db_name	table_name	column_name	min_value	max_value	nulls_ratio	avg_length	avg_frequency	hist_size	hist_type	hex(histogram)	decode_histogram(hist_type, histogram)
+test	Table1	PetAge	2	252	0.0000	4.0000	NULL	10	DOUBLE_PREC_HB	842BB75E1E8547A109D7	0.16999,0.20000,0.15001,0.11000,0.20999,0.16001
+test	Table1	NumberOfPuppies	2	250	0.0000	4.0000	NULL	10	DOUBLE_PREC_HB	E13AD663FF7F47A1EAD1	0.23000,0.15999,0.11000,0.13001,0.18999,0.18001
+#
+# Comparison between sampling 100% and sampling without specifying the percentage.
+# Hint Hint... It should be the same thing.
+ANALYZE FAST TABLE Table1 SAMPLING 100 PERCENT PERSISTENT FOR COLUMNS (PetAge, NumberOfPuppies);
+Table	Op	Msg_type	Msg_text
+test.Table1	analyze_fast	status	Engine-independent statistics collected
+test.Table1	analyze_fast	status	OK
+select db_name, table_name, column_name, min_value, max_value, nulls_ratio, avg_length, avg_frequency, hist_size, hist_type, hex(histogram), decode_histogram(hist_type, histogram)
+from mysql.column_stats where table_name='Table1';
+db_name	table_name	column_name	min_value	max_value	nulls_ratio	avg_length	avg_frequency	hist_size	hist_type	hex(histogram)	decode_histogram(hist_type, histogram)
+test	Table1	PetAge	2	252	0.0000	4.0000	NULL	10	DOUBLE_PREC_HB	842BB75E1E8547A109D7	0.16999,0.20000,0.15001,0.11000,0.20999,0.16001
+test	Table1	NumberOfPuppies	2	250	0.0000	4.0000	NULL	10	DOUBLE_PREC_HB	E13AD663FF7F47A1EAD1	0.23000,0.15999,0.11000,0.13001,0.18999,0.18001
+#
+ANALYZE FAST TABLE Table1 SAMPLING 50 PERCENT PERSISTENT FOR COLUMNS (PetAge, NumberOfPuppies);
+Table	Op	Msg_type	Msg_text
+test.Table1	analyze_fast	status	Engine-independent statistics collected
+test.Table1	analyze_fast	status	OK
+select db_name, table_name, column_name, min_value, max_value, nulls_ratio, avg_length, avg_frequency, hist_size, hist_type, hex(histogram), decode_histogram(hist_type, histogram)
+from mysql.column_stats where table_name='Table1';
+db_name	table_name	column_name	min_value	max_value	nulls_ratio	avg_length	avg_frequency	hist_size	hist_type	hex(histogram)	decode_histogram(hist_type, histogram)
+test	Table1	PetAge	10	252	0.0000	4.0000	NULL	10	DOUBLE_PREC_HB	8F4266665B8FD6A309D7	0.26000,0.14000,0.15999,0.08000,0.20000,0.16001
+test	Table1	NumberOfPuppies	2	250	0.0000	4.0000	NULL	10	DOUBLE_PREC_HB	8F42A3707A9451B865E6	0.26000,0.18000,0.14000,0.14000,0.18000,0.10001
+#
+ANALYZE FAST TABLE Table1 SAMPLING 23 PERCENT PERSISTENT FOR COLUMNS (PetAge, NumberOfPuppies);
+Table	Op	Msg_type	Msg_text
+test.Table1	analyze_fast	status	Engine-independent statistics collected
+test.Table1	analyze_fast	status	OK
+select db_name, table_name, column_name, min_value, max_value, nulls_ratio, avg_length, avg_frequency, hist_size, hist_type, hex(histogram), decode_histogram(hist_type, histogram)
+from mysql.column_stats where table_name='Table1';
+db_name	table_name	column_name	min_value	max_value	nulls_ratio	avg_length	avg_frequency	hist_size	hist_type	hex(histogram)	decode_histogram(hist_type, histogram)
+test	Table1	PetAge	11	252	0.0000	4.0000	NULL	10	DOUBLE_PREC_HB	6421E94D4D6F4D6F15B2	0.13043,0.17391,0.13043,0.00000,0.26087,0.30436
+test	Table1	NumberOfPuppies	10	250	0.0000	4.0000	NULL	10	DOUBLE_PREC_HB	852C9085B19058C879D3	0.17391,0.34783,0.04347,0.21740,0.04347,0.17392
+#
+# Error messages
+ANALYZE FAST TABLE Table1 WITH 0 ROWS PERSISTENT FOR COLUMNS (LastName);
+ERROR HY000: WITH ... ROWS must have a positive number
+#
+ANALYZE FAST TABLE Table1 SAMPLING 0 PERCENT PERSISTENT FOR COLUMNS (LastName);
+ERROR HY000: SAMPLING ... PERCENT must have a positive number
+#
+ANALYZE FAST TABLE Table1 LASTS 0 SECONDS PERSISTENT FOR COLUMNS (LastName);
+ERROR HY000: LASTS ... SECONDS must have a positive number
+#
+ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (LastName IN RANGE 0);
+ERROR HY000: IN RANGE ... must have a positive number
+#
+DROP TABLE Table1;
+#
+CREATE TABLE Table1 (
+`LastName` VARCHAR(20),
+`FirstName` VARCHAR(20),
+`PetAge` INT UNSIGNED, 
+`PetName` VARCHAR(20),
+`NumberOfPuppies` INT UNSIGNED,
+UNIQUE KEY (`PetName`)
+) ENGINE=InnoDb;
+#
+# Table values
+INSERT INTO Table1 (PetName, LastName, FirstName, PetAge, NumberOfPuppies) VALUES
+("Phrom", "Uttlyea", "Chshkouts", 248, 169),
+("Gationatia", "Gatess", "Camo", 118, 224);
+#
+set histogram_size=10;
+set histogram_type='DOUBLE_PREC_HB';
+#
+# Error for the case in which there is no primary key
+ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (PetAge, NumberOfPuppies);
+Table	Op	Msg_type	Msg_text
+test.Table1	analyze_fast	Error	This table type requires a primary key
+test.Table1	analyze_fast	status	Operation failed
+#
+DROP TABLE Table1;

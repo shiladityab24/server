@@ -2766,6 +2766,166 @@ public:
   virtual ~Handler_share() {}
 };
 
+class Sampling {
+ private:
+  /*
+    How many samples out of 100 are chosen.
+     0 <= 'sampling_percentage' <= 100
+  */
+  ulonglong sampling_percentage;
+
+  /* 
+    The position of the first chosen sample, all next samples will be chosen
+    acording to this one.
+     0 <= 'start pos' <= (100 / 'sampling percentage')
+  */
+  ulonglong start_pos;
+
+  /*
+    The position of the current sample.
+    0 <= 'current_pos' < 'no_records'
+  */
+  ulonglong current_pos;
+
+  /*
+    The number of rows of this table.
+  */
+  ulonglong no_records;
+
+  /*
+    The position of the values between 0 and 100.
+     0 <= 'percentile pos' < 'sampling percentage'
+  */
+  ulonglong percentile_pos;
+
+  /*
+    Used for selecting values beyound 100.
+     0 <= 'hundred_multiplier'
+  */
+  ulonglong hundred_multiplier;
+  
+  ulonglong first_key;
+
+  ulonglong last_key;
+
+ public:
+  Sampling()
+  {}
+
+  uint key_part_num;
+
+  Sampling(ulonglong samp, ulonglong start, ulonglong nor)
+  {
+    sampling_percentage = samp;
+    start_pos = start;
+    current_pos = 0;
+    no_records = nor;
+    percentile_pos = 0;
+    hundred_multiplier = 0;
+  }
+  
+  ulonglong get_current_pos()
+  {
+    return current_pos;
+  }
+
+  ulonglong get_no_records()
+  {
+    return no_records;
+  }
+
+  ulonglong get_no_samples()
+  {
+    return no_records * sampling_percentage / 100;
+  }
+
+  ulonglong get_current_key()
+  {
+    return (last_key - first_key) * current_pos / (no_records - 1) + first_key;
+  }
+
+  void set_first_key(ulonglong fk)
+  {
+    first_key = fk;
+  }
+
+  void set_last_key(ulonglong lk)
+  {
+    last_key = lk;
+  }
+    
+  /* 
+    Changes the 'current_pos' to the next one from the table which will be
+    sampled.
+
+    How selecting a value, acording to the 'sampling percentage', works.
+    Suppose we want a 'sampling percentage' of 23, which means that out of 100
+    values, 23 are chosen. 
+
+    The '1st pos' must be between 0 and 100 / 23 (which
+    is 4), the value can be chosen randomly or by the user.
+
+    Suppose the '1st pos' is 3 (for the sake of computational simplicity
+    can be considered (3 + (0 * 100) / 23)). 
+
+    The '2nd pos' is (3 + (1 * 100) / 23) which is 7.
+    The '3rd pos' is (3 + (2 * 100) / 23) which is 11.
+    The '4th pos' is (3 + (3 * 100) / 23) which is 16.
+    ...
+    The '21st pos' is (3 + (20 * 100) / 23) which is 89.
+    The '22nd pos' is (3 + (21 * 100) / 23) which is 94.
+    The '23rd pos' is (3 + (22 * 100) / 23) which is 98.
+
+    Continuing beyound the 23rd values just requires starting from the
+    '1st pos' and adding 100.
+
+    The '24th pos' is (3 + (0 * 100) / 23 + 1 * 100) which is 103
+    ...
+    The '47th pos' is (3 + (0 * 100) / 23 + 2 * 100) which is 203
+    ...
+    The '70th pos' is (3 + (0 * 100) / 23 + 3 * 100) which is 303
+    ...
+    The process of sampling continues unitl the end of the table.
+
+    Time complexity: O( #sampling_percentage * #no_records / 100 )
+  */
+  int next()
+  {
+    percentile_pos ++;
+    if (percentile_pos >= sampling_percentage)
+    {
+      percentile_pos = 0;
+      hundred_multiplier ++;
+    }
+    current_pos = start_pos + (percentile_pos * 100) / sampling_percentage
+                + hundred_multiplier * 100;
+    return 0;
+  }
+
+  /*
+    Verifies if the end of the table has been reached.
+  */
+  bool reached_end()
+  {
+    if (current_pos < no_records)
+      return false;
+    return true;
+  }
+
+  int init()
+  {
+    current_pos = 0;
+    percentile_pos = 0;
+    hundred_multiplier = 0;
+    return 0;
+  }
+
+  int reset()
+  {
+    return init();
+  }
+};
+
 
 /**
   The handler class is the interface for dynamically loadable
@@ -2956,6 +3116,9 @@ private:
   */
   Handler_share **ha_share;
 
+  /* Used for sampling */ 
+  class Sampling sampling;
+  
 public:
   handler(handlerton *ht_arg, TABLE_SHARE *share_arg)
     :table_share(share_arg), table(0),
@@ -3545,6 +3708,12 @@ public:
   }
   virtual int read_first_row(uchar *buf, uint primary_key);
 public:
+  /* Used for sampling data */
+  int ha_rnd_sample(uchar *buf);
+  int ha_rnd_init_sample(bool scan, ulonglong samp, ulonglong start,
+  ulonglong nor);
+  int ha_rnd_end_sample();
+  int ha_rnd_reset_sample(bool scan);
 
   /* Same as above, but with statistics */
   inline int ha_ft_read(uchar *buf);
