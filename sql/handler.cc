@@ -2747,6 +2747,98 @@ int handler::ha_close(void)
   DBUG_RETURN(close());
 }
 
+int handler::ha_rnd_sample(uchar *buf)
+{
+  int result;
+
+  DBUG_ENTER("handler::ha_rnd_sample");
+
+  if (row_number_to_row_id == NULL)
+  {
+    result = 1;
+  }
+  else if (sampling.reached_end() == true)
+  {
+    result = HA_ERR_END_OF_FILE;
+  }
+  else
+  {
+    int current_pos = sampling.get_current_pos();
+    result = table->file->ha_rnd_pos(table->record[0],
+             (uchar*) &(row_number_to_row_id[current_pos]));
+    sampling.next();
+  }
+
+  DBUG_RETURN(result);
+}
+
+int handler::ha_rnd_init_sample(bool scan, ulonglong samp, ulonglong start,
+ulonglong nor)
+{
+  int result;
+  /* Creates the array 'row_number_to_row_id' which stores to values of the
+     Primary Keys acording to their position */
+
+  DBUG_ENTER("handler::ha_rnd_init_sample");
+
+  sampling = Sampling(samp, start, nor);
+  if (row_number_to_row_id == NULL)
+  {
+    /* Verifies if the table has a Primary Key column and builds an array that
+       pairs the column number to the PK ID TODO*/
+    ulonglong pk_pos = 0;
+    ulonglong sample_pos = 0;
+    size_t no_values;
+
+    no_values = sizeof(ulonglong) * table->file->records();
+    row_number_to_row_id = (ulonglong*) my_malloc (no_values, MYF(0));
+
+    Field **column_ptr = table->field;
+    Field *column = *(column_ptr + pk_pos);
+
+    if (!(result = ha_rnd_init(TRUE)))
+    {
+      DEBUG_SYNC(table->in_use, "building row_number_to_row_id array");
+
+      while ((result = ha_rnd_next(table->record[0])) != HA_ERR_END_OF_FILE)
+      {
+        if (result)
+        {
+          if (result == HA_ERR_RECORD_DELETED)
+            continue;
+          break;
+        }
+
+        row_number_to_row_id[sample_pos] = column->val_uint();
+        sample_pos ++;
+
+        if (result)
+          break;
+      }
+      ha_rnd_end();
+    }
+  }
+  sampling.init();
+  result = ha_rnd_init(scan);
+
+  DBUG_RETURN(result);
+}
+
+int handler::ha_rnd_end_sample()
+{
+  int result;
+
+  DBUG_ENTER("handler::ha_rnd_end_sample");
+
+  if (row_number_to_row_id != NULL)
+  {
+    my_free(row_number_to_row_id);
+    row_number_to_row_id = NULL;
+  }
+  result = ha_rnd_end();
+
+  DBUG_RETURN(result);
+}
 
 int handler::ha_rnd_next(uchar *buf)
 {

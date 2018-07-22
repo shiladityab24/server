@@ -124,7 +124,7 @@ private:
   /* Used for calculating Width Balanced Histograms */
   /* Stores the number of elements of each bin prior to being stored
      in 'values' */
-  ulonglong* bins;      
+  ulonglong* bins = NULL;
 
   /*
     The accuracy of a stored value. Single Precision has the accuracy of 255
@@ -147,8 +147,11 @@ public:
   a certain interval */
   void malloc_bins()
   {
-    bins = (ulonglong*) malloc(sizeof(ulonglong) * (get_width() + 1));
-    memset(bins, 0x00, sizeof(ulonglong) * (get_width() + 1));
+    if (bins == NULL)
+    {
+      bins = (ulonglong*) malloc(sizeof(ulonglong) * (get_width() + 1));
+      memset(bins, 0x00, sizeof(ulonglong) * (get_width() + 1));
+    }
   }
 
   void malloc_values()
@@ -159,7 +162,11 @@ public:
   /* Free memory for 'bins' */
   void free_bins()
   {
-    free(bins);
+    if (bins != NULL)
+    {
+      free(bins);
+      bins = NULL;
+    }
   }
 
 

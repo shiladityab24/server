@@ -12,21 +12,15 @@ CREATE TABLE Table1 (
  PRIMARY KEY (PetID)
 );
 
-INSERT INTO Table1 (PetID, PetName, LastName, FirstName, PetAge, NumOfPuppies)
-VALUES
-(1, "Flufy", "Yates", "Maria", 5, 2),
-(2, "Buttons", "David", "Jones", 3, 0),
-(3, "Paws", "Johanson", "Samuel", 6, 2),
-(4, "Paws", "Johanson", "Samuel", 5, 2),
-(5, "Paws", "Johanson", "Samuel", 7, 2),
-(6, "Paws", "Johanson", "Samuel", 8, 2),
-(7, "Paws", "Johanson", "Samuel", 3, 2),
-(8, "Paws", "Johanson", "Samuel", 5, 2),
-(9, "Paws", "Johanson", "Samuel", 4, 2);
+INSERT INTO Table1 VALUES
+(10076, "a", "Ncampolierti", "Urti", 118, 171),
+(82942, "c", "Abettionsessio", "Baystions", 175, 237),
+(82982, "b", "Abettionsessio", "Baystions", 175, 237);
 
-set histogram_size=10;
+set histogram_size=1;
+set histogram_type='SINGLE_PREC_HB';
 ANALYZE TABLE Table1 PERSISTENT FOR ALL;
 select min_value, max_value, hist_type, hex(histogram), decode_histogram(hist_type, histogram)
-from mysql.column_stats where table_name='Table1' and column_name='PetID';
+from mysql.column_stats where table_name='Table1';
 
 DROP TABLE Table1;

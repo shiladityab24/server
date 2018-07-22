@@ -2764,150 +2764,6 @@ int collect_statistics_for_index(THD *thd, TABLE *table, uint index)
   DBUG_RETURN(rc);
 }
 
-class Sampling {
- private:
-  /*
-    How many samples out of 100 are chosen.
-     0 <= 'sampling_percentage' <= 100
-  */
-  ulonglong sampling_percentage;
-
-  /* 
-    The position of the first chosen sample, all next samples will be chosen
-    acording to this one.
-     0 <= 'start pos' <= (100 / 'sampling percentage')
-  */
-  ulonglong start_pos;
-
-  /*
-    The position of the current sample.
-    0 <= 'current_pos' < 'no_records'
-  */
-  ulonglong current_pos;
-
-  /*
-    The number of rows of this table.
-  */
-  ulonglong no_records;
-
-  /*
-    The position of the values between 0 and 100.
-     0 <= 'percentile pos' < 'sampling percentage'
-  */
-  ulonglong percentile_pos;
-
-  /*
-    Used for selecting values beyound 100.
-     0 <= 'hundred_multiplier'
-  */
-  ulonglong hundred_multiplier;
-
- public:
-  Sampling(ulonglong samp, ulonglong start, ulonglong nor)
-  {
-    sampling_percentage = samp;
-    start_pos = start;
-    current_pos = 0;
-    no_records = nor;
-    percentile_pos = 0;
-    hundred_multiplier = 0;
-  }
-  
-  ulonglong get_current_pos()
-  {
-    return current_pos;
-  }
-
-  ulonglong get_no_records()
-  {
-    return no_records;
-  }
-
-  ulonglong get_no_samples()
-  {
-    return no_records * sampling_percentage / 100;
-  }
-
-  /* 
-    Changes the 'current_pos' to the next one from the table which will be
-    sampled.
-
-    How selecting a value, acording to the 'sampling percentage', works.
-    Suppose we want a 'sampling percentage' of 23, which means that out of 100
-    values, 23 are chosen. 
-    The '1st pos' must be between 0 and 100 / 23 (which
-    is 4), the value can be chosen randomly or by the user.
-    Suppose the '1st pos' is 3 (for the sake of computational simplicity
-    can be considered (3 + (0 * 100) / 23)). 
-    The '2nd pos' is (3 + (1 * 100) / 23) which is 7.
-    The '3rd pos' is (3 + (2 * 100) / 23) which is 11.
-    The '4th pos' is (3 + (3 * 100) / 23) which is 16.
-    ...
-    The '21st pos' is (3 + (20 * 100) / 23) which is 89.
-    The '22nd pos' is (3 + (21 * 100) / 23) which is 94.
-    The '23rd pos' is (3 + (22 * 100) / 23) which is 98.
-    Continuing beyound the 23rd values just requires starting from the
-    '1st pos' and adding 100.
-    The '24th pos' is (3 + (0 * 100) / 23 + 1 * 100) which is 103
-    ...
-    The '47th pos' is (3 + (0 * 100) / 23 + 2 * 100) which is 203
-    ...
-    The '70th pos' is (3 + (0 * 100) / 23 + 3 * 100) which is 303
-    ...
-    The process of sampling continues unitl the end of the table.
-    Time complexity: O( #sampling_percentage * #no_records / 100 )
-  */
-  int next(TABLE *table)
-  {
-    percentile_pos ++;
-    if (percentile_pos >= sampling_percentage)
-    {
-      percentile_pos = 0;
-      hundred_multiplier ++;
-    }
-    ulonglong last_pos = current_pos;
-    current_pos = start_pos + (percentile_pos * 100) / sampling_percentage
-                + hundred_multiplier * 100;
-    if (end() == true)
-    {
-      return HA_ERR_END_OF_FILE;
-    }
-    int rc;
-    for (ulonglong i=last_pos; i<current_pos; i++)
-    {
-      if ((rc = table->file->ha_rnd_next(table->record[0])) 
-          == HA_ERR_END_OF_FILE)
-      {
-        return HA_ERR_END_OF_FILE;
-      }
-    }
-    return rc;
-  }
-
-  /*
-    Verifies if the end of the table has been reached.
-  */
-  bool end()
-  {
-    if (current_pos < no_records)
-      return false;
-    return true;
-  }
-
-  int init(TABLE *table)
-  {
-    current_pos = 0;
-    percentile_pos = 0;
-    hundred_multiplier = 0;
-    int rc;
-    if ((rc = table->file->ha_rnd_init(TRUE)))
-    {
-      return rc;
-    }
-    return table->file->ha_rnd_next(table->record[0]);
-  }
-};
-
 /**
   @brief 
   Collect fast statistical data from the table. The genereated histogram is
@@ -2926,12 +2782,13 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
   Field *table_field;
   handler *file=table->file;
   ulonglong sampling_percentage = thd->lex->sampling_percentage;
-  Sampling sampling = Sampling(sampling_percentage, 0, file->records());
+  ulonglong start_position = 0;
+  ulonglong no_records = file->records();
 
   DBUG_ENTER("collect_fast_statistics_for_table");
 
   table->collected_stats->cardinality_is_null = TRUE;
-  table->collected_stats->cardinality = sampling.get_no_samples();
+  table->collected_stats->cardinality = sampling_percentage * no_records / 100;
 
   /* Initialize the fields that collect statistics */
   for (field_ptr= table->field; *field_ptr; field_ptr++)
@@ -2950,11 +2807,13 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
     the minimum column value, the maximum column value and the distinct values
     from each field
   */
-  if (!(rc= sampling.init(table)))
-  {  
+  if (!(rc = file->ha_rnd_init_sample(TRUE, sampling_percentage,
+      start_position, no_records)))
+  {
     DEBUG_SYNC(table->in_use, "min_and_max_collection");
 
-    do
+    while ((rc = file->ha_rnd_sample(table->record[0]) != HA_ERR_END_OF_FILE)
+           != HA_ERR_END_OF_FILE)
     {
       if (thd->killed)
         break;
@@ -2977,19 +2836,20 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
       if (rc)
         break;
     }
-    while ((rc = sampling.next(table)) != HA_ERR_END_OF_FILE);
 
-    table->file->ha_rnd_end();
+    file->ha_rnd_end_sample();
   }
 
   rc= (rc == HA_ERR_END_OF_FILE && !thd->killed) ? 0 : 1;
 
   /* Starts placing each table value in buckets */
-  if (!(rc= sampling.init(table)))
-  {  
-    DEBUG_SYNC(table->in_use, "fast_statistics_collection_start");
+  if (!(rc = file->ha_rnd_init_sample(TRUE, sampling_percentage,
+      start_position, no_records)))
+  {
+    DEBUG_SYNC(table->in_use, "sampling values");
 
-    do
+    while ((rc = file->ha_rnd_sample(table->record[0]) != HA_ERR_END_OF_FILE)
+           != HA_ERR_END_OF_FILE)
     {
       if (thd->killed)
         break;
@@ -3012,9 +2872,8 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
       if (rc)
         break;
     }
-    while ((rc = sampling.next(table)) != HA_ERR_END_OF_FILE);
 
-    table->file->ha_rnd_end();
+    file->ha_rnd_end_sample();
   }
 
   rc= (rc == HA_ERR_END_OF_FILE && !thd->killed) ? 0 : 1;
@@ -3024,7 +2883,7 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
     table_field= *field_ptr;
     if (!bitmap_is_set(table->read_set, table_field->field_index))
       continue;
-    table_field->collected_stats->finish_wb(sampling.get_no_samples());
+    table_field->collected_stats->finish_wb(table->collected_stats->cardinality);
   }
 
   bitmap_clear_all(table->write_set);
