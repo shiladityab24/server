@@ -117,18 +117,26 @@ class Histogram
 {
 
 private:
+  /* The 'type' dictates the precision of the Histogram (Single/Double) */
   Histogram_type type;
-  uint8 size; /* Size of values array, in bytes */
+
+  /* Size of values array, in bytes */
+  uint8 size;
+
+  /*
+    Store the percentage of values that falls in each bin.
+    Depeding on the 'type' of the histogram, the precision changes
+  */
   uchar *values;
 
-  /* Used for calculating Width Balanced Histograms */
-  /* Stores the number of elements of each bin prior to being stored
-     in 'values' */
+  /*
+    Stores the number of elements of each bin prior to being stored in 'values' 
+  */
   ulonglong* bins;
 
   /*
     The accuracy of a stored value. Single Precision has the accuracy of 255
-    and Double Precision has the accuracy of 65535.
+    (2**8 - 1) and Double Precision has the accuracy of 65535 (2**16 - 1).
   */
   uint prec_factor()
   {
@@ -146,29 +154,36 @@ public:
   Histogram() : bins(NULL)
   {}
 
-  /* Alocate memory for 'bins', which stores how many numbers fall between
-  a certain interval */
+  /*
+    Alocate memory for 'bins'
+    bins - stores how many numbers fall between a certain number interval
+    TODO(elvio) - check if 'bins' is NULL and then allocate memory
+  */
   void malloc_bins()
   {
     bins = (ulonglong*) malloc(sizeof(ulonglong) * (get_width() + 1));
     memset(bins, 0x00, sizeof(ulonglong) * (get_width() + 1));
   }
 
+  /*
+    Alocate memory for 'values'
+    values - stores the percentage of values that falls within a bin;
+           - the percentage is stored more/less accurately depending on 'type'
+    TODO(elvio) - check if 'values' is NULL and then allocate memory
+  */
   void malloc_values()
   {
     values = (uchar*) malloc(sizeof(uchar) * size);
   }
 
-  /* Free memory for 'bins' */
+  /* Free memory for 'bins'
+     TODO(elvio) - check if 'bins' is not NULL and then free memory
+  */
   void free_bins()
   {
-    if (bins != NULL)
-    {
-      free(bins);
-      bins = NULL;
-    }
+    free(bins);
+    bins = NULL;
   }
-
 
    /* 
      How to find the appropriate bin for a value
@@ -203,11 +218,14 @@ public:
     ulonglong maxval, /* maximum value */
     ulonglong minval) /* minimum value */
   {
-    if (val > maxval || val < minval)
+    /* The value must be between the boundaries of the min and max values */
+    if (val > maxval || val < minval) 
     {
       return;
     }
-    ulonglong bin_no; /* the bin in which the value will be placed */
+    /* The bin in which the value will be placed */
+    ulonglong bin_no;
+    /* The last bin must include de max value */
     if (val == maxval)
     {
       bin_no = get_width();
@@ -217,7 +235,10 @@ public:
     }
     bins[bin_no] ++;
   }
-
+  
+  /*
+    Stores the values from the 'bin's as percentages in 'values'
+  */
   void store_wb(ha_rows no_samples) {
     ulonglong stored_value = 0;
     for (uint8 bin_no = 0; bin_no < get_width(); bin_no++) {

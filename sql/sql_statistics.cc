@@ -2768,6 +2768,7 @@ int collect_statistics_for_index(THD *thd, TABLE *table, uint index)
   @brief 
   Collect fast statistical data from the table. The genereated histogram is
   an Equal-Width Histogram (also known as Width-Balanced Histogram).
+  The data is sampled randomly from the table.
 
   @param
   thd         The thread handle
@@ -2801,6 +2802,11 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
 
   restore_record(table, s->default_values);
 
+  /*
+    'ha_rnd_init_sample' creates an array which stores the PKs according to 
+    their position in the table.
+    This array makes sampling possible by facilitating access by position.
+  */
   if (!(rc = file->ha_rnd_init_sample(TRUE, sampling_percentage,
       start_position, no_records)))
   {
@@ -2810,7 +2816,7 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
       the minimum column value, the maximum column value and the distinct values
       from each field
     */
-    DEBUG_SYNC(table->in_use, "min_and_max_collection");
+    DEBUG_SYNC(table->in_use, "determining min and max");
 
     while ((rc = file->ha_rnd_sample(table->record[0])) != HA_ERR_END_OF_FILE)
     {
@@ -2836,11 +2842,13 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
         break;
     }
 
+    /* Resets the sampling the end of the table has been reached */
+
     file->ha_rnd_reset_sample(TRUE);
 
     /* Starts placing each table value in buckets */
 
-    DEBUG_SYNC(table->in_use, "sampling values");
+    DEBUG_SYNC(table->in_use, "increasing bin sizes according the values");
 
     while ((rc = file->ha_rnd_sample(table->record[0])) != HA_ERR_END_OF_FILE)
     {
@@ -2870,6 +2878,8 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
   }
   
   rc= (rc == HA_ERR_END_OF_FILE && !thd->killed) ? 0 : 1;
+  
+  /* Finishing sampling collection */
 
   for (field_ptr= table->field; *field_ptr; field_ptr++)
   {
