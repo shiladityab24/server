@@ -2763,9 +2763,10 @@ int handler::ha_rnd_sample(uchar *buf)
   }
   else
   {
-    int current_pos = sampling.get_current_pos();
-    result = table->file->ha_rnd_pos(table->record[0],
-             (uchar*) &(row_number_to_row_id[current_pos]));
+    ulonglong current_pos = sampling.get_current_pos();
+    ulonglong rowid_length = table->file->ref_length;
+    uchar *rowid =  row_number_to_row_id + current_pos * rowid_length;
+    result = table->file->ha_rnd_pos(table->record[0], rowid);
     sampling.next();
   }
 
@@ -2776,31 +2777,32 @@ int handler::ha_rnd_init_sample(bool scan, ulonglong samp, ulonglong start,
 ulonglong nor)
 {
   int result;
+  handler *file=table->file;
+
   /* Creates the array 'row_number_to_row_id' which stores to values of the
      Primary Keys acording to their position */
 
   DBUG_ENTER("handler::ha_rnd_init_sample");
 
   sampling = Sampling(samp, start, nor);
+
   if (row_number_to_row_id == NULL)
   {
-    /* Verifies if the table has a Primary Key column and builds an array that
-       pairs the column number to the PK ID TODO*/
-    ulonglong pk_pos = 0;
+    uint pk_bit = (*(table->field))->field_index;
+    bitmap_set_bit(table->read_set, pk_bit); // TODO set & clear depend on if it was set 
+
     ulonglong sample_pos = 0;
-    size_t no_values;
+    ulonglong row_count = file->records();
+    ulonglong rowid_length = file->ref_length;
+    size_t no_values = row_count * rowid_length; 
 
-    no_values = sizeof(ulonglong) * table->file->records();
-    row_number_to_row_id = (ulonglong*) my_malloc (no_values, MYF(0));
+    row_number_to_row_id = (uchar*) my_malloc (no_values, MYF(0));
 
-    Field **column_ptr = table->field;
-    Field *column = *(column_ptr + pk_pos);
-
-    if (!(result = ha_rnd_init(TRUE)))
-    {
+    if (!(result= file->ha_rnd_init(TRUE)))
+    {  
       DEBUG_SYNC(table->in_use, "building row_number_to_row_id array");
 
-      while ((result = ha_rnd_next(table->record[0])) != HA_ERR_END_OF_FILE)
+      while ((result= file->ha_rnd_next(table->record[0])) != HA_ERR_END_OF_FILE)
       {
         if (result)
         {
@@ -2809,17 +2811,23 @@ ulonglong nor)
           break;
         }
 
-        row_number_to_row_id[sample_pos] = column->val_uint();
-        sample_pos ++;
+        file->position(table->record[0]);
+        memcpy(row_number_to_row_id + sample_pos * rowid_length,
+               file->ref, rowid_length);
 
         if (result)
           break;
+        sample_pos ++;
       }
-      ha_rnd_end();
+
+      file->ha_rnd_end();
     }
+
+    bitmap_clear_bit(table->read_set, pk_bit);
   }
+
   sampling.init();
-  result = ha_rnd_init(scan);
+  result = file->ha_rnd_init(scan);
 
   DBUG_RETURN(result);
 }
@@ -2836,6 +2844,21 @@ int handler::ha_rnd_end_sample()
     row_number_to_row_id = NULL;
   }
   result = ha_rnd_end();
+
+  DBUG_RETURN(result);
+}
+
+int handler::ha_rnd_reset_sample(bool scan)
+{
+  int result;
+
+  DBUG_ENTER("handler::ha_rnd_end_sample");
+
+  result = ha_rnd_end();
+
+  result = ha_rnd_init(scan);
+
+  sampling.reset();
 
   DBUG_RETURN(result);
 }

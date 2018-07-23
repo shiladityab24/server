@@ -2801,19 +2801,18 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
 
   restore_record(table, s->default_values);
 
-  /*
-    Perform a full table scan to collect statistics on 'table's columns 
-    The statistics collected are: the total length (bytes) of the column,
-    the minimum column value, the maximum column value and the distinct values
-    from each field
-  */
   if (!(rc = file->ha_rnd_init_sample(TRUE, sampling_percentage,
       start_position, no_records)))
   {
+    /*
+      Perform a full table scan to collect statistics on 'table's columns 
+      The statistics collected are: the total length (bytes) of the column,
+      the minimum column value, the maximum column value and the distinct values
+      from each field
+    */
     DEBUG_SYNC(table->in_use, "min_and_max_collection");
 
-    while ((rc = file->ha_rnd_sample(table->record[0]) != HA_ERR_END_OF_FILE)
-           != HA_ERR_END_OF_FILE)
+    while ((rc = file->ha_rnd_sample(table->record[0])) != HA_ERR_END_OF_FILE)
     {
       if (thd->killed)
         break;
@@ -2837,19 +2836,13 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
         break;
     }
 
-    file->ha_rnd_end_sample();
-  }
+    file->ha_rnd_reset_sample(TRUE);
 
-  rc= (rc == HA_ERR_END_OF_FILE && !thd->killed) ? 0 : 1;
+    /* Starts placing each table value in buckets */
 
-  /* Starts placing each table value in buckets */
-  if (!(rc = file->ha_rnd_init_sample(TRUE, sampling_percentage,
-      start_position, no_records)))
-  {
     DEBUG_SYNC(table->in_use, "sampling values");
 
-    while ((rc = file->ha_rnd_sample(table->record[0]) != HA_ERR_END_OF_FILE)
-           != HA_ERR_END_OF_FILE)
+    while ((rc = file->ha_rnd_sample(table->record[0])) != HA_ERR_END_OF_FILE)
     {
       if (thd->killed)
         break;
@@ -2875,7 +2868,7 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
 
     file->ha_rnd_end_sample();
   }
-
+  
   rc= (rc == HA_ERR_END_OF_FILE && !thd->killed) ? 0 : 1;
 
   for (field_ptr= table->field; *field_ptr; field_ptr++)
@@ -2887,6 +2880,7 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
   }
 
   bitmap_clear_all(table->write_set);
+
   DBUG_RETURN(rc);          
 }
 

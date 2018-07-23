@@ -124,7 +124,7 @@ private:
   /* Used for calculating Width Balanced Histograms */
   /* Stores the number of elements of each bin prior to being stored
      in 'values' */
-  ulonglong* bins = NULL;
+  ulonglong* bins;
 
   /*
     The accuracy of a stored value. Single Precision has the accuracy of 255
@@ -143,15 +143,15 @@ private:
 
 public:
 
+  Histogram() : bins(NULL)
+  {}
+
   /* Alocate memory for 'bins', which stores how many numbers fall between
   a certain interval */
   void malloc_bins()
   {
-    if (bins == NULL)
-    {
-      bins = (ulonglong*) malloc(sizeof(ulonglong) * (get_width() + 1));
-      memset(bins, 0x00, sizeof(ulonglong) * (get_width() + 1));
-    }
+    bins = (ulonglong*) malloc(sizeof(ulonglong) * (get_width() + 1));
+    memset(bins, 0x00, sizeof(ulonglong) * (get_width() + 1));
   }
 
   void malloc_values()
@@ -290,7 +290,7 @@ private:
   }
 
 public:
-
+  
   uint get_size() { return (uint) size; }
 
   Histogram_type get_type() { return type; }

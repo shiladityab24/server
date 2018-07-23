@@ -2898,6 +2898,11 @@ class Sampling {
     hundred_multiplier = 0;
     return 0;
   }
+
+  int reset()
+  {
+    return init();
+  }
 };
 
 
@@ -3091,7 +3096,7 @@ private:
   Handler_share **ha_share;
 
   /* Used for sampling */ 
-  ulonglong *row_number_to_row_id;
+  uchar *row_number_to_row_id;
   class Sampling sampling;
   
 public:
@@ -3688,6 +3693,7 @@ public:
   int ha_rnd_init_sample(bool scan, ulonglong samp, ulonglong start,
   ulonglong nor);
   int ha_rnd_end_sample();
+  int ha_rnd_reset_sample(bool scan);
 
   /* Same as above, but with statistics */
   inline int ha_ft_read(uchar *buf);
