@@ -6,13 +6,14 @@ Warnings:
 Note	1051	Unknown table 'test.Table1'
 #
 CREATE TABLE Table1 (
-`ID` INT UNSIGNED NOT NULL AUTO_INCREMENT, 
-`PetName` VARCHAR(20),
 `LastName` VARCHAR(20),
+`ID` INT UNSIGNED NOT NULL AUTO_INCREMENT, 
 `FirstName` VARCHAR(20),
 `PetAge` INT UNSIGNED, 
+`PetName` VARCHAR(20),
 `NumberOfPuppies` INT UNSIGNED,
-PRIMARY KEY(`ID`)
+PRIMARY KEY (`ID`),
+UNIQUE KEY (`PetName`)
 ) ENGINE=InnoDb;
 #
 # Table values
@@ -118,107 +119,107 @@ INSERT INTO Table1 (PetName, LastName, FirstName, PetAge, NumberOfPuppies) VALUE
 ("Timmorinerea", "Smspitender", "Istsm", 94, 67),
 ("Elifigiencesoci", "Nnysimsedsollead", "Barsi", 33, 158);
 SELECT * FROM Table1;
-ID	PetName	LastName	FirstName	PetAge	NumberOfPuppies
-1	Phrom	Uttlyea	Chshkouts	248	169
-2	Gationatia	Gatess	Camo	118	224
-3	Isfincelicur	Sinchacoperspi	Usementschaini	124	47
-4	Aningsss	Puriever	Essentradped	165	172
-5	Acro	Prograte	Uggl	37	87
-6	Banicrushwi	Arubionfudel	Raneduslyt	187	128
-7	Acri	Rtinse	Ngyster	21	12
-8	Ariestastuarna	Libill	Vestenmatio	185	238
-9	Pindomestarcudin	Apeliapedscaser	Borge	69	139
-10	Imentivapp	Untionangranagel	Exallutssnolour	243	29
-11	Surintardeachfor	Acherentante	Endeningsss	155	181
-12	Alicristansil	Tertspoosit	Ccellonsupss	194	199
-13	Nompassi	Suliessibblere	Adectrawson	44	25
-14	Deje	Relyes	Rochardsterwapp	183	35
-15	Argla	Tatroudierumi	Nuouch	247	178
-16	Tancestasti	Ncencheekined	Ershotchm	61	35
-17	Udgm	Osepangern	Whooperept	212	199
-18	Hortbe	Istswetallessse	Ionasseborenemo	234	183
-19	Tiontssaurai	Aracollusssitta	Adightchecons	19	73
-20	Itslyw	Lachlegrassers	Ersepi	72	10
-21	Ightseenializzes	Stlyeryclestr	Onmetinginesqu	101	30
-22	Helissi	Parssignoming	Oxygre	202	65
-23	Nixswedesssynsid	Sphorotsalesess	Opershingsber	46	68
-24	Ouserse	Miew	Himings	65	178
-25	Gersous	Rstrumbstaing	Tfor	195	100
-26	Hibb	Stson	Nesionshb	247	49
-27	Cotidendian	Uttlesinsitl	Rysock	200	77
-28	Oppalog	Stlyraddlogoutle	Cyster	2	96
-29	Ionsmartsur	Allyheake	Rbanutsbystopy	36	226
-30	Ingentsphousdi	Custo	Ineskysseniskint	128	205
-31	Rcifyinelido	Thernectines	Cede	85	233
-32	Altieckbrat	Lestinesonsenti	Rersiesytesitte	168	42
-33	Approbbiter	Tivallyfulai	Asoaleb	247	199
-34	Laysfa	Ngletsaventi	Ityspilians	59	229
-35	Antin	Enstederest	Calopsysl	216	81
-36	Ussicallaticiset	Dvittlieststio	Oushmeddli	200	228
-37	Ings	Rrannessbusas	Edescifing	199	16
-38	Reconatss	Ringsti	Rmerlena	32	232
-39	Pesicsslonglysor	Essssolly	Oblepc	140	193
-40	Erso	Lbelorkingsk	Abledstain	86	10
-41	Larristsupl	Cheatestree	Coastria	191	42
-42	Erondumar	Odst	Plastabrimpli	60	224
-43	Lertspedian	Tateragen	Terapratechneri	84	19
-44	Gestrummeaverdsu	Sell	Hyperintly	213	244
-45	Easterelma	Bstsmitie	Icssestoog	205	24
-46	Mplermor	Ivergessie	Eupughtings	131	173
-47	Ecomplasiencroc	Ersikscomsdol	Neshrobbiltest	100	61
-48	Tion	Rmaraf	Rricarshr	217	138
-49	Nednessenthedbr	Achail	Ypturts	21	249
-50	Erituruestr	Nichsousloque	Bumalcke	104	201
-51	Ankleanuhnhays	Odigglaccl	Izessol	76	32
-52	Abalvelimpensey	Ootallsonat	Idect	95	77
-53	Ownestrows	Ashadobbehe	Negglumqin	26	98
-54	Binge	King	Estortock	61	168
-55	Heourch	Dimutork	Guatcher	67	171
-56	Disy	Herstarperme	Ysto	75	103
-57	Supharizersi	Fulnukkax	Onsebow	252	78
-58	Arbasseers	Antsubbirtseodge	Hebagp	39	155
-59	Eiggiv	Caticancizerthe	Ujawnin	38	159
-60	Bullic	Prainagr	Gicksmenst	81	119
-61	Trons	Itysm	Postsystsm	232	250
-62	Tedfas	Iestslyces	Iddlictsynxedi	193	181
-63	Oucternessori	Latskysepstena	Inst	99	37
-64	Orserscadsto	Xcingthordeentin	Baconferi	185	189
-65	Rgsssic	Uffeets	Ffindulabbe	143	151
-66	Orterinsi	Rmingarlestriack	Epuslots	127	31
-67	Erva	Pectingst	Hationemellstra	247	180
-68	Arderv	Rksoplediedic	Natesseka	82	237
-69	Cred	Sizedillarria	Ller	77	2
-70	Oessenzoncessism	Cuthenchagen	Ndlibratioxygu	116	213
-71	Ensterbi	Rimalkes	Cingstrumbl	199	25
-72	Ionshester	Ltusso	Lism	238	49
-73	Iftiongabili	Rkerat	Inglutive	183	150
-74	Chstancessautcri	Oseb	Ierrysmugeasple	64	76
-75	Ubtsss	Ppicanselisim	Mprastedyin	121	121
-76	Liversingsoracu	Olinsteartsords	Aiiastantsking	108	209
-77	Emells	Herditysi	Byinnorthrubel	28	231
-78	Bilesta	Gloystagosthg	Ntsmstor	129	213
-79	Ionnindstabb	Olionsio	Proatiouisquilee	120	67
-80	Synxsw	Istiondlersium	Ensonerslodstan	19	26
-81	Uentskaryst	Menur	Womboascuive	175	118
-82	Ablec	Plibriggerst	Temblinquityss	232	111
-83	Inoestarks	Ethgolishiricles	Sione	11	33
-84	Mbuckligst	Neespestiossn	Ersesssadvanat	65	244
-85	Nablygrelcale	Batiogellamoco	Inseekediantessi	143	156
-86	Depscr	Sionsimbrat	Dismalsky	13	4
-87	Ckscoluir	Valdicianzeso	Taig	183	149
-88	Niandsesi	Cancloomper	Tern	223	212
-89	Tonercesssan	Aigroarmaliv	Rylle	10	97
-90	Aterseethimp	Iessedw	Izedivensontemor	204	137
-91	Eloteri	Lansastonstinta	Klesoatersiv	21	119
-92	Ometlessnest	Msiersher	Riblortis	206	58
-93	Luen	Matorebiahelmo	Ackshasts	82	36
-94	Ggingertivandist	Tensassistablerl	Arkerict	151	15
-95	Shanash	Lauhansp	Dever	207	189
-96	Serysiantrysonst	Eassestlefumis	Itufflizederse	181	141
-97	Oactomptindsolar	Ctiman	Jochaliffl	99	135
-98	Earainghtion	Sslarluitalimol	Itionaties	107	79
-99	Timmorinerea	Smspitender	Istsm	94	67
-100	Elifigiencesoci	Nnysimsedsollead	Barsi	33	158
+LastName	ID	FirstName	PetAge	PetName	NumberOfPuppies
+Uttlyea	1	Chshkouts	248	Phrom	169
+Gatess	2	Camo	118	Gationatia	224
+Sinchacoperspi	3	Usementschaini	124	Isfincelicur	47
+Puriever	4	Essentradped	165	Aningsss	172
+Prograte	5	Uggl	37	Acro	87
+Arubionfudel	6	Raneduslyt	187	Banicrushwi	128
+Rtinse	7	Ngyster	21	Acri	12
+Libill	8	Vestenmatio	185	Ariestastuarna	238
+Apeliapedscaser	9	Borge	69	Pindomestarcudin	139
+Untionangranagel	10	Exallutssnolour	243	Imentivapp	29
+Acherentante	11	Endeningsss	155	Surintardeachfor	181
+Tertspoosit	12	Ccellonsupss	194	Alicristansil	199
+Suliessibblere	13	Adectrawson	44	Nompassi	25
+Relyes	14	Rochardsterwapp	183	Deje	35
+Tatroudierumi	15	Nuouch	247	Argla	178
+Ncencheekined	16	Ershotchm	61	Tancestasti	35
+Osepangern	17	Whooperept	212	Udgm	199
+Istswetallessse	18	Ionasseborenemo	234	Hortbe	183
+Aracollusssitta	19	Adightchecons	19	Tiontssaurai	73
+Lachlegrassers	20	Ersepi	72	Itslyw	10
+Stlyeryclestr	21	Onmetinginesqu	101	Ightseenializzes	30
+Parssignoming	22	Oxygre	202	Helissi	65
+Sphorotsalesess	23	Opershingsber	46	Nixswedesssynsid	68
+Miew	24	Himings	65	Ouserse	178
+Rstrumbstaing	25	Tfor	195	Gersous	100
+Stson	26	Nesionshb	247	Hibb	49
+Uttlesinsitl	27	Rysock	200	Cotidendian	77
+Stlyraddlogoutle	28	Cyster	2	Oppalog	96
+Allyheake	29	Rbanutsbystopy	36	Ionsmartsur	226
+Custo	30	Ineskysseniskint	128	Ingentsphousdi	205
+Thernectines	31	Cede	85	Rcifyinelido	233
+Lestinesonsenti	32	Rersiesytesitte	168	Altieckbrat	42
+Tivallyfulai	33	Asoaleb	247	Approbbiter	199
+Ngletsaventi	34	Ityspilians	59	Laysfa	229
+Enstederest	35	Calopsysl	216	Antin	81
+Dvittlieststio	36	Oushmeddli	200	Ussicallaticiset	228
+Rrannessbusas	37	Edescifing	199	Ings	16
+Ringsti	38	Rmerlena	32	Reconatss	232
+Essssolly	39	Oblepc	140	Pesicsslonglysor	193
+Lbelorkingsk	40	Abledstain	86	Erso	10
+Cheatestree	41	Coastria	191	Larristsupl	42
+Odst	42	Plastabrimpli	60	Erondumar	224
+Tateragen	43	Terapratechneri	84	Lertspedian	19
+Sell	44	Hyperintly	213	Gestrummeaverdsu	244
+Bstsmitie	45	Icssestoog	205	Easterelma	24
+Ivergessie	46	Eupughtings	131	Mplermor	173
+Ersikscomsdol	47	Neshrobbiltest	100	Ecomplasiencroc	61
+Rmaraf	48	Rricarshr	217	Tion	138
+Achail	49	Ypturts	21	Nednessenthedbr	249
+Nichsousloque	50	Bumalcke	104	Erituruestr	201
+Odigglaccl	51	Izessol	76	Ankleanuhnhays	32
+Ootallsonat	52	Idect	95	Abalvelimpensey	77
+Ashadobbehe	53	Negglumqin	26	Ownestrows	98
+King	54	Estortock	61	Binge	168
+Dimutork	55	Guatcher	67	Heourch	171
+Herstarperme	56	Ysto	75	Disy	103
+Fulnukkax	57	Onsebow	252	Supharizersi	78
+Antsubbirtseodge	58	Hebagp	39	Arbasseers	155
+Caticancizerthe	59	Ujawnin	38	Eiggiv	159
+Prainagr	60	Gicksmenst	81	Bullic	119
+Itysm	61	Postsystsm	232	Trons	250
+Iestslyces	62	Iddlictsynxedi	193	Tedfas	181
+Latskysepstena	63	Inst	99	Oucternessori	37
+Xcingthordeentin	64	Baconferi	185	Orserscadsto	189
+Uffeets	65	Ffindulabbe	143	Rgsssic	151
+Rmingarlestriack	66	Epuslots	127	Orterinsi	31
+Pectingst	67	Hationemellstra	247	Erva	180
+Rksoplediedic	68	Natesseka	82	Arderv	237
+Sizedillarria	69	Ller	77	Cred	2
+Cuthenchagen	70	Ndlibratioxygu	116	Oessenzoncessism	213
+Rimalkes	71	Cingstrumbl	199	Ensterbi	25
+Ltusso	72	Lism	238	Ionshester	49
+Rkerat	73	Inglutive	183	Iftiongabili	150
+Oseb	74	Ierrysmugeasple	64	Chstancessautcri	76
+Ppicanselisim	75	Mprastedyin	121	Ubtsss	121
+Olinsteartsords	76	Aiiastantsking	108	Liversingsoracu	209
+Herditysi	77	Byinnorthrubel	28	Emells	231
+Gloystagosthg	78	Ntsmstor	129	Bilesta	213
+Olionsio	79	Proatiouisquilee	120	Ionnindstabb	67
+Istiondlersium	80	Ensonerslodstan	19	Synxsw	26
+Menur	81	Womboascuive	175	Uentskaryst	118
+Plibriggerst	82	Temblinquityss	232	Ablec	111
+Ethgolishiricles	83	Sione	11	Inoestarks	33
+Neespestiossn	84	Ersesssadvanat	65	Mbuckligst	244
+Batiogellamoco	85	Inseekediantessi	143	Nablygrelcale	156
+Sionsimbrat	86	Dismalsky	13	Depscr	4
+Valdicianzeso	87	Taig	183	Ckscoluir	149
+Cancloomper	88	Tern	223	Niandsesi	212
+Aigroarmaliv	89	Rylle	10	Tonercesssan	97
+Iessedw	90	Izedivensontemor	204	Aterseethimp	137
+Lansastonstinta	91	Klesoatersiv	21	Eloteri	119
+Msiersher	92	Riblortis	206	Ometlessnest	58
+Matorebiahelmo	93	Ackshasts	82	Luen	36
+Tensassistablerl	94	Arkerict	151	Ggingertivandist	15
+Lauhansp	95	Dever	207	Shanash	189
+Eassestlefumis	96	Itufflizederse	181	Serysiantrysonst	141
+Ctiman	97	Jochaliffl	99	Oactomptindsolar	135
+Sslarluitalimol	98	Itionaties	107	Earainghtion	79
+Smspitender	99	Istsm	94	Timmorinerea	67
+Nnysimsedsollead	100	Barsi	33	Elifigiencesoci	158
 #
 # Without FLUSH, the following ANALYZE FAST command would have no idea about the number of rows from the table
 FLUSH TABLE Table1;
@@ -331,5 +332,30 @@ ERROR HY000: LASTS ... SECONDS must have a positive number
 #
 ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (LastName IN RANGE 0);
 ERROR HY000: IN RANGE ... must have a positive number
+#
+DROP TABLE Table1;
+#
+CREATE TABLE Table1 (
+`LastName` VARCHAR(20),
+`FirstName` VARCHAR(20),
+`PetAge` INT UNSIGNED, 
+`PetName` VARCHAR(20),
+`NumberOfPuppies` INT UNSIGNED,
+UNIQUE KEY (`PetName`)
+) ENGINE=InnoDb;
+#
+# Table values
+INSERT INTO Table1 (PetName, LastName, FirstName, PetAge, NumberOfPuppies) VALUES
+("Phrom", "Uttlyea", "Chshkouts", 248, 169),
+("Gationatia", "Gatess", "Camo", 118, 224);
+#
+set histogram_size=10;
+set histogram_type='DOUBLE_PREC_HB';
+#
+# Error for the case in which there is no primary key
+ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (PetAge, NumberOfPuppies);
+Table	Op	Msg_type	Msg_text
+test.Table1	analyze_fast	Error	This table type requires a primary key
+test.Table1	analyze_fast	status	Operation failed
 #
 DROP TABLE Table1;

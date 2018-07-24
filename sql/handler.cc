@@ -2796,13 +2796,36 @@ ulonglong nor)
   DBUG_ENTER("handler::ha_rnd_init_sample");
 
   sampling = Sampling(samp, start, nor);
-
+  
   if (row_number_to_row_id == NULL)
   {
-    /* TODO(elvio) right now, the code asumes the PK is in the 1st column
-                   it must be changed in order to check to PK column position */
-    ulonglong pk_column = 0;
-    uint pk_bit = (*((table->field) + pk_column))->field_index;
+    /*
+      The table must have a primay key in order to sample data with 'ha_rnd_pos'
+    */
+    ulonglong pk_fieldnr = 0;
+    bool exists_pk_fieldnr = false;
+    for (ulonglong keyno = 0; keyno < table->s->keys; keyno++)
+    {
+      if (strcmp((table->s->key_info + keyno)->name.str, "PRIMARY") == 0)
+      {
+        pk_fieldnr = ((table->s->key_info + keyno)->key_part->fieldnr) - 1;
+        exists_pk_fieldnr = true;
+        break;
+      }
+    }
+
+    if (exists_pk_fieldnr == false)
+    {
+      /*
+      TODO(elvio) maybe use this instead of my_error ?
+      my_message(ER_REQUIRES_PRIMARY_KEY, ER_THD(thd, ER_REQUIRES_PRIMARY_KEY),
+                 MYF(0));
+      */
+      my_error(ER_REQUIRES_PRIMARY_KEY, MYF(0));
+      DBUG_RETURN(1);
+    }
+
+    uint pk_bit = (*((table->field) + pk_fieldnr))->field_index;
     // TODO(elvio) set & clear depend on if the PK column was set before
     bitmap_set_bit(table->read_set, pk_bit);
 

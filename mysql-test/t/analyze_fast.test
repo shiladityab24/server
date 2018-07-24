@@ -8,13 +8,14 @@ DROP TABLE IF EXISTS Table1;
 
 --echo #
 CREATE TABLE Table1 (
- `ID` INT UNSIGNED NOT NULL AUTO_INCREMENT, 
- `PetName` VARCHAR(20),
  `LastName` VARCHAR(20),
+ `ID` INT UNSIGNED NOT NULL AUTO_INCREMENT, 
  `FirstName` VARCHAR(20),
  `PetAge` INT UNSIGNED, 
+ `PetName` VARCHAR(20),
  `NumberOfPuppies` INT UNSIGNED,
- PRIMARY KEY(`ID`)
+ PRIMARY KEY (`ID`),
+ UNIQUE KEY (`PetName`)
 ) ENGINE=InnoDb;
 
 --echo #
@@ -201,6 +202,33 @@ ANALYZE FAST TABLE Table1 LASTS 0 SECONDS PERSISTENT FOR COLUMNS (LastName);
 --echo #
 --error ER_POSITIVE_NUMBER
 ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (LastName IN RANGE 0);
+
+--echo #
+DROP TABLE Table1;
+
+--echo #
+CREATE TABLE Table1 (
+ `LastName` VARCHAR(20),
+ `FirstName` VARCHAR(20),
+ `PetAge` INT UNSIGNED, 
+ `PetName` VARCHAR(20),
+ `NumberOfPuppies` INT UNSIGNED,
+ UNIQUE KEY (`PetName`)
+) ENGINE=InnoDb;
+
+--echo #
+--echo # Table values
+INSERT INTO Table1 (PetName, LastName, FirstName, PetAge, NumberOfPuppies) VALUES
+("Phrom", "Uttlyea", "Chshkouts", 248, 169),
+("Gationatia", "Gatess", "Camo", 118, 224);
+
+--echo #
+set histogram_size=10;
+set histogram_type='DOUBLE_PREC_HB';
+
+--echo #
+--echo # Error for the case in which there is no primary key
+ANALYZE FAST TABLE Table1 PERSISTENT FOR COLUMNS (PetAge, NumberOfPuppies);
 
 --echo #
 DROP TABLE Table1;
