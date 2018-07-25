@@ -2785,11 +2785,18 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
   ulonglong sampling_percentage = thd->lex->sampling_percentage;
   ulonglong start_position = 0;
   ulonglong no_records = file->records();
+  /*
+    TODO(elvio) cardinality (aka the number of records that were read from the
+    table) needs to pe a percentage only if there are a great number of records
+    if there are a few of them, no need for sampling (maybe only as an override
+    to check the correctness of the calculations
+  */
+  ulonglong cardinality = sampling_percentage * no_records / 100; 
 
   DBUG_ENTER("collect_fast_statistics_for_table");
 
   table->collected_stats->cardinality_is_null = TRUE;
-  table->collected_stats->cardinality = sampling_percentage * no_records / 100;
+  table->collected_stats->cardinality = cardinality;
 
   /* Initialize the fields that collect statistics */
   for (field_ptr= table->field; *field_ptr; field_ptr++)
@@ -2886,7 +2893,7 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
     table_field= *field_ptr;
     if (!bitmap_is_set(table->read_set, table_field->field_index))
       continue;
-    table_field->collected_stats->finish_wb(table->collected_stats->cardinality);
+    table_field->collected_stats->finish_wb(cardinality);
   }
 
   bitmap_clear_all(table->write_set);
