@@ -2827,6 +2827,10 @@ ulonglong nor)
 
     uint pk_bit = (*((table->field) + pk_fieldnr))->field_index;
     bool flip_pk_bits = false;
+    /*
+      If the PK bit is not set, file->position won't generate file->ref because
+      file->ptr cannot be accesed unless the bit is set
+    */
     if (!bitmap_is_set(table->read_set, pk_bit))
     {
       flip_pk_bits = true;
