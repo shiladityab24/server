@@ -2826,8 +2826,12 @@ ulonglong nor)
     }
 
     uint pk_bit = (*((table->field) + pk_fieldnr))->field_index;
-    // TODO(elvio) set & clear depend on if the PK column was set before
-    bitmap_set_bit(table->read_set, pk_bit);
+    bool flip_pk_bits = false;
+    if (!bitmap_is_set(table->read_set, pk_bit))
+    {
+      flip_pk_bits = true;
+      bitmap_flip_bit(table->read_set, pk_bit);
+    }
 
     ulonglong sample_pos = 0;
     ulonglong row_count = file->records();
@@ -2862,7 +2866,8 @@ ulonglong nor)
       file->ha_rnd_end();
     }
 
-    bitmap_clear_bit(table->read_set, pk_bit);
+    if (flip_pk_bits == true)
+      bitmap_flip_bit(table->read_set, pk_bit);
   }
 
   sampling.init();
