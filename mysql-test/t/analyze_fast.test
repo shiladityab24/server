@@ -16,7 +16,7 @@ CREATE TABLE Table1 (
  `NumberOfPuppies` INT UNSIGNED,
  PRIMARY KEY (`ID`),
  UNIQUE KEY (`PetName`)
-) ENGINE=InnoDb;
+) Engine=InnoDB;
 
 --echo #
 --echo # Table values

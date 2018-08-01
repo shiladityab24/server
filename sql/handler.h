@@ -2803,10 +2803,16 @@ class Sampling {
      0 <= 'hundred_multiplier'
   */
   ulonglong hundred_multiplier;
-
+  
  public:
   Sampling()
   {}
+
+  uint key_part_num;
+
+  ulonglong first_key;
+
+  ulonglong last_key;
 
   Sampling(ulonglong samp, ulonglong start, ulonglong nor)
   {
@@ -3096,7 +3102,6 @@ private:
   Handler_share **ha_share;
 
   /* Used for sampling */ 
-  uchar *row_number_to_row_id;
   class Sampling sampling;
   
 public:
@@ -3121,7 +3126,7 @@ public:
     auto_inc_intervals_count(0),
     m_psi(NULL), set_top_table_fields(FALSE), top_table(0),
     top_table_field(0), top_table_fields(0),
-    m_lock_type(F_UNLCK), ha_share(NULL), row_number_to_row_id(NULL)
+    m_lock_type(F_UNLCK), ha_share(NULL)
   {
     DBUG_PRINT("info",
                ("handler created F_UNLCK %d F_RDLCK %d F_WRLCK %d",

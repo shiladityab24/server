@@ -2880,7 +2880,7 @@ int collect_fast_statistics_for_table(THD *thd, TABLE *table)
       if (rc)
         break;
     }
-
+    
     file->ha_rnd_end_sample();
   }
   
