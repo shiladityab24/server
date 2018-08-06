@@ -2804,15 +2804,15 @@ class Sampling {
   */
   ulonglong hundred_multiplier;
   
+  ulonglong first_key;
+
+  ulonglong last_key;
+
  public:
   Sampling()
   {}
 
   uint key_part_num;
-
-  ulonglong first_key;
-
-  ulonglong last_key;
 
   Sampling(ulonglong samp, ulonglong start, ulonglong nor)
   {
@@ -2839,6 +2839,21 @@ class Sampling {
     return no_records * sampling_percentage / 100;
   }
 
+  ulonglong get_current_key()
+  {
+    return (last_key - first_key) * current_pos / (no_records - 1) + first_key;
+  }
+
+  void set_first_key(ulonglong fk)
+  {
+    first_key = fk;
+  }
+
+  void set_last_key(ulonglong lk)
+  {
+    last_key = lk;
+  }
+    
   /* 
     Changes the 'current_pos' to the next one from the table which will be
     sampled.

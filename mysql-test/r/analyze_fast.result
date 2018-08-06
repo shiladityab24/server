@@ -14,7 +14,7 @@ CREATE TABLE Table1 (
 `NumberOfPuppies` INT UNSIGNED,
 PRIMARY KEY (`ID`),
 UNIQUE KEY (`PetName`)
-) ENGINE=InnoDb;
+) Engine=InnoDB;
 #
 # Table values
 INSERT INTO Table1 (PetName, LastName, FirstName, PetAge, NumberOfPuppies) VALUES

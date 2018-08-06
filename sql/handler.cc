@@ -2765,9 +2765,10 @@ int handler::ha_rnd_sample(uchar *buf)
   {
     uchar key[MAX_KEY_LENGTH];
     uint key_part_num = sampling.key_part_num;
-    (table->key_info + key_part_num)->key_part->field->store(4, 0);
+    (table->key_info + key_part_num)->key_part->field->store(
+      sampling.get_current_key(), 0);
     key_copy(key, table->record[0], table->key_info + key_part_num, 0);
-    result = ha_index_read_map(table->record[0], key,
+    result = ha_index_read_map(buf, key,
                                HA_WHOLE_KEY, HA_READ_KEY_OR_NEXT);
     sampling.next();
   }
@@ -2800,16 +2801,16 @@ ulonglong nor)
         result = 0;
         uint index = (table->key_info + keynum)->key_part->field->field_index;
         bitmap_set_bit(table->write_set, index);
-        ha_index_init(index, TRUE);
+        ha_index_init(keynum, TRUE);
         /* Get the first and the last PK */
         bitmap_set_bit(table->read_set, index);
         Field *table_field = (table->key_info + keynum)->key_part->field;
         if ((result = ha_index_first(table->record[0])))
           DBUG_RETURN(result);
-        sampling.first_key = table_field->val_uint();
+        sampling.set_first_key(table_field->val_uint());
         if ((result = ha_index_last(table->record[0])))
           DBUG_RETURN(result);
-        sampling.last_key = table_field->val_uint();
+        sampling.set_last_key(table_field->val_uint());
         bitmap_clear_bit(table->read_set, index);
         break;
       }
