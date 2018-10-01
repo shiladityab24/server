@@ -1311,7 +1311,7 @@ bool mysql_preload_keys(THD* thd, TABLE_LIST* tables)
 bool Sql_cmd_analyze_fast_table::execute(THD *thd)
 {
   LEX *m_lex= thd->lex;
-  TABLE_LIST *first_table= m_lex->select_lex.table_list.first;
+  TABLE_LIST *first_table= m_lex->first_select_lex()->table_list.first;
   bool res= TRUE;
   thr_lock_type lock_type = TL_READ_NO_INSERT;
   DBUG_ENTER("Sql_cmd_analyze_fast_table::execute");
@@ -1331,7 +1331,7 @@ bool Sql_cmd_analyze_fast_table::execute(THD *thd)
     */
     res= write_bin_log(thd, TRUE, thd->query(), thd->query_length());
   }
-  m_lex->select_lex.table_list.first= first_table;
+  m_lex->first_select_lex()->table_list.first= first_table;
   m_lex->query_tables= first_table;
 
 error:

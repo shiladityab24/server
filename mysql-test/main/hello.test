@@ -1,0 +1,62 @@
+--source include/have_innodb.inc
+
+--echo #
+--echo # load >10 bilion values in table 
+--echo #
+
+DROP TABLE IF EXISTS Table1;
+
+SET GLOBAL @@innodb_buffer_pool_size=11200000000;
+
+--echo #
+CREATE TABLE Table1 (
+ `Summons Number` BIGINT UNSIGNED,
+ `Plate ID` VARCHAR(60),
+ `Registration State` VARCHAR(60),
+ `Plate Type` VARCHAR(60),
+ `Issue Date` DATE,
+ `Violation Code` BIGINT UNSIGNED,
+ `Vehicle Body Type` VARCHAR(60),
+ `Vehicle Make` VARCHAR(60),
+ `Issuing Agency` VARCHAR(60),
+ `Street Code1` BIGINT UNSIGNED,
+ `Street Code2` BIGINT UNSIGNED,
+ `Street Code3` BIGINT UNSIGNED,
+ `Vehicle Expiration Date` BIGINT UNSIGNED,
+ `Violation Location` VARCHAR(60),
+ `Violation Precinct` BIGINT UNSIGNED,
+ `Issuer Precinct` BIGINT UNSIGNED,
+ `Issuer Code` BIGINT UNSIGNED,
+ `Issuer Command` VARCHAR(60),
+ `Issuer Squad` VARCHAR(60),
+ `Violation Time` VARCHAR(60),
+ `Time First Observed` VARCHAR(60),
+ `Violation County` VARCHAR(60),
+ `Violation In Front Of Or Opposite` VARCHAR(60),
+ `House Number` VARCHAR(60),
+ `Street Name` VARCHAR(60),
+ `Intersecting Street` VARCHAR(60),
+ `Date First Observed` BIGINT UNSIGNED,
+ `Law Section` BIGINT UNSIGNED,
+ `Sub Division` VARCHAR(60),
+ `Violation Legal Code` VARCHAR(60),
+ `Days Parking In Effect` VARCHAR(60),
+ `From Hours In Effect` VARCHAR(60),
+ `To Hours In Effect` VARCHAR(60),
+ `Vehicle Color` VARCHAR(60),
+ `Unregistered Vehicle?` VARCHAR(60),
+ `Vehicle Year` BIGINT UNSIGNED,
+ `Meter Number` VARCHAR(60),
+ `Feet From Curb` BIGINT UNSIGNED,
+ `Violation Post Code` VARCHAR(60),
+ `Violation Description` VARCHAR(60),
+ `No Standing or Stopping Violation` VARCHAR(60),
+ `Hydrant Violation` VARCHAR(60),
+ `Double Parking Violation` VARCHAR(60) 
+) Engine=InnoDB;
+
+--echo # LOAD DATA LOCAL INFILE '/home/elvio/Workspace/Parking_Violations_Issued_-_Fiscal_Year_2016.csv' INTO TABLE Table1;
+
+SELECT * FROM Table1 LIMIT 10;
+
+DROP TABLE Table1;
